@@ -7,5 +7,15 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "sanctuary": "^3.0.0",
+    "sanctuary-def": "^0.21.1",
+    "sanctuary-descending": "^2.1.0",
+    "sanctuary-either": "^2.1.0",
+    "sanctuary-maybe": "^2.1.0",
+    "sanctuary-pair": "^2.1.0",
+    "sanctuary-show": "^2.0.0",
+    "sanctuary-type-classes": "^12.1.0"
+  }
 }
