@@ -44,15 +44,26 @@ const maybeStraight = def("maybeStraight")({})([Cards, $.Maybe(Hand)])
     return S.map(cards => ({cards, rank: HAND_RANKS[4]}))(S.isJust(ms)? ms : mw)
   })
 
-
 //    maybeStraightFlush :: Cards -> Maybe Hand
 const maybeStraightFlush = def("maybeStraightFlush")({})([Cards, $.Maybe(Hand)])
   (S.compose
     (S.chain(({cards}) => S.map(({cards}) => ({cards, rank: HAND_RANKS[8]}))(maybeFlush(cards))))
     (maybeStraight))
 
+//    maybeQuads :: Cards -> Maybe Hand
+const maybeQuads = def("maybeQuads")({})([Cards, $.Maybe(Hand)])
+  (cards => {
+    const sorted = sortBy("value")(cards)
+    const xs = groupBy("rank")(sorted)
+    const maybeQuads = S.find(x => x.length === 4)(xs)
+    const maybeKicker = S.head(sorted)
+
+    return S.map(cards => ({cards, rank: HAND_RANKS[7]}))(S.lift2(S.append)(maybeKicker)(maybeQuads))
+  })
+
 module.exports = {
   maybeFlush,
   maybeStraight,
   maybeStraightFlush,
+  maybeQuads,
 }
