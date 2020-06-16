@@ -5,6 +5,17 @@ const env = $.env;
 const def = $.create({checkTypes: true, env})
 
 const CARD_RANKS =  ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]
+const HAND_RANKS =  [
+  "High Card",
+  "Pair",
+  "Two Pair",
+  "Trips",
+  "Straight",
+  "Flush",
+  "Full House",
+  "Quads",
+  "Straight Flush",
+]
 
 //    Rank :: Type
 const Rank = $.NullaryType("Rank")("")([$.String])
@@ -18,8 +29,21 @@ const Suit = $.NullaryType("Suit")("")([$.String])
 const Card = $.NamedRecordType("Card")("")([])
   ({rank: Rank, suit: Suit, value: $.PositiveFiniteNumber})
 
+const Cards = $.Array(Card)
+
+//    HandRank :: Type
+const HandRank = $.NullaryType("HandRank")("")([$.String])
+  (x => HAND_RANKS.indexOf(x) > -1)
+
+//    Hand :: Type
+const Hand = $.NamedRecordType("Hand")("")([])
+  ({cards: Cards, rank: HandRank})
+
 module.exports = {
   def,
   CARD_RANKS,
   Card,
+  Cards,
+  HAND_RANKS,
+  Hand,
 }
