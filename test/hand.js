@@ -1,7 +1,7 @@
 const test = require("ava")
 
 const S = require("sanctuary")
-const {maybeFlush, maybeStraight} = require ("../hand")
+const {maybeFlush, maybeStraight, maybeStraightFlush} = require ("../hand")
 const {newCard} = require ("../card")
 
 const highCard = S.map(newCard)(["2c", "4c", "9h", "Ah", "7h", "Jh", "Tc"])
@@ -13,7 +13,7 @@ const straightWheel = S.map(newCard)(["2c", "3d", "2h", "Ah", "4h", "5d", "Tc"])
 const flush = S.map(newCard)(["2h", "4c", "9h", "Ah", "7h", "Jh", "Tc"])
 const fullHouse = S.map(newCard)(["2c", "4d", "2h", "Ah", "4h", "2d", "Tc"])
 const quads = S.map(newCard)(["2c", "2d", "2h", "Ah", "4h", "2s", "Tc"])
-// const straightFlush = S.map(newCard)(["2h", "4h", "3h", "Ah", "7h", "5h", "Tc"])
+const straightFlush = S.map(newCard)(["2h", "4h", "3h", "Ah", "7h", "5h", "Tc"])
 
 test("maybeFlush -> Nothing; high card", t => {
   t.deepEqual(
@@ -78,16 +78,6 @@ test("maybeFlush -> Nothing; quads", t => {
   )
 })
 
-// test("maybeFlush -> Nothing; straight flush", t => {
-//   t.deepEqual(
-//     maybeFlush(straightFlush),
-//     S.Nothing
-//   )
-// })
-//
-//
-
-
 test("maybeStraight -> Nothing; high card", t => {
   t.deepEqual(
     maybeStraight(highCard),
@@ -148,5 +138,12 @@ test("maybeStraight -> Nothing; quads", t => {
   t.deepEqual(
     maybeStraight(quads),
     S.Nothing
+  )
+})
+
+test("maybeStraightFlush -> just straight flush", t => {
+  t.deepEqual(
+    maybeStraightFlush(straightFlush),
+    S.Just({cards: S.map(newCard)(["Ah", "5h", "4h", "3h", "2h"]), rank: "Straight Flush"})
   )
 })

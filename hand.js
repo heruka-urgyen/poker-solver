@@ -44,7 +44,15 @@ const maybeStraight = def("maybeStraight")({})([Cards, $.Maybe(Hand)])
     return S.map(cards => ({cards, rank: HAND_RANKS[4]}))(S.isJust(ms)? ms : mw)
   })
 
+
+//    maybeStraightFlush :: Cards -> Maybe Hand
+const maybeStraightFlush = def("maybeStraightFlush")({})([Cards, $.Maybe(Hand)])
+  (S.compose
+    (S.chain(({cards}) => S.map(({cards}) => ({cards, rank: HAND_RANKS[8]}))(maybeFlush(cards))))
+    (maybeStraight))
+
 module.exports = {
   maybeFlush,
   maybeStraight,
+  maybeStraightFlush,
 }
