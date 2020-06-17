@@ -112,14 +112,33 @@ const maybeHighCard = def("maybeHighCard")({})([Cards, $.Maybe(Hand)])
     return S.map(cards => ({cards, rank: HAND_RANKS[0]}))(maybeHighCard)
   })
 
+//    solveHand :: Cards -> Maybe Hand
+const solveHand = def("solveHand")({})([Cards, $.Maybe(Hand)])
+  (cards => S.reduce
+    (res => f => {
+      if (S.isNothing(res)) {
+        const maybeHand = f(cards)
+
+        if (S.isJust(maybeHand)) {
+          return maybeHand
+        }
+      }
+
+      return res
+    })
+    (S.Nothing)
+    ([maybeStraightFlush,
+      maybeQuads,
+      maybeFullHouse,
+      maybeFlush,
+      maybeStraight,
+      maybeTrips,
+      maybeTwoPair,
+      maybePair,
+      maybeHighCard
+    ])
+  )
+
 module.exports = {
-  maybeFlush,
-  maybeStraight,
-  maybeStraightFlush,
-  maybeQuads,
-  maybeFullHouse,
-  maybeTrips,
-  maybeTwoPair,
-  maybePair,
-  maybeHighCard,
+  solveHand,
 }
