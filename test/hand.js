@@ -8,6 +8,7 @@ const {
   maybeQuads,
   maybeTrips,
   maybeTwoPair,
+  maybePair,
 } = require ("../hand")
 const {newCard} = require ("../card")
 
@@ -341,6 +342,69 @@ test("maybeTwoPair -> Nothing; full house", t => {
 test("maybeTwoPair -> Nothing; quads", t => {
   t.deepEqual(
     maybeTwoPair(quads),
+    S.Nothing
+  )
+})
+
+test("maybePair -> Nothing; high card", t => {
+  t.deepEqual(
+    maybePair(highCard),
+    S.Nothing
+  )
+})
+
+test("maybePair -> just pair", t => {
+  t.deepEqual(
+    maybePair(pair),
+    S.Just({cards: S.map(newCard)(["2c", "2h", "Ah", "Jh", "Tc"]), rank: "Pair"})
+  )
+})
+
+// test("maybePair -> Nothing; two pair", t => {
+//   t.deepEqual(
+//     maybePair(twoPair),
+//     S.Nothing
+//   )
+// })
+
+test("maybePair -> Nothing; trips", t => {
+  t.deepEqual(
+    maybePair(trips),
+    S.Nothing
+  )
+})
+
+// test("maybePair -> Nothing; straight", t => {
+//   t.deepEqual(
+//     maybePair(straight),
+//     S.Nothing
+//   )
+// })
+//
+// test("maybePair -> Nothing; straight wheel", t => {
+//   t.deepEqual(
+//     maybePair(straightWheel),
+//     S.Nothing
+//   )
+// })
+//
+test("maybePair -> Nothing; flush", t => {
+  t.deepEqual(
+    maybePair(flush),
+    S.Nothing
+  )
+})
+
+// test("maybePair -> Nothing; full house", t => {
+//   t.deepEqual(
+//     maybePair(fullHouse),
+//     S.Nothing
+//   )
+// })
+
+test("maybePair -> Nothing; quads", t => {
+  t.deepEqual(
+    maybePair(quads),
     S.Nothing
   )
 })
