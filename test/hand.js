@@ -1,7 +1,14 @@
 const test = require("ava")
 const S = require("sanctuary")
 
-const {maybeFlush, maybeStraight, maybeStraightFlush, maybeQuads, maybeTrips} = require ("../hand")
+const {
+  maybeFlush,
+  maybeStraight,
+  maybeStraightFlush,
+  maybeQuads,
+  maybeTrips,
+  maybeTwoPair,
+} = require ("../hand")
 const {newCard} = require ("../card")
 
 const highCard = S.map(newCard)(["2c", "4c", "9h", "Ah", "7h", "Jh", "Tc"])
@@ -271,6 +278,69 @@ test("maybeTrips -> Nothing; flush", t => {
 test("maybeTrips -> Nothing; quads", t => {
   t.deepEqual(
     maybeTrips(quads),
+    S.Nothing
+  )
+})
+
+test("maybeTwoPair -> Nothing; high card", t => {
+  t.deepEqual(
+    maybeTwoPair(highCard),
+    S.Nothing
+  )
+})
+
+test("maybeTwoPair -> Nothing; pair", t => {
+  t.deepEqual(
+    maybeTwoPair(pair),
+    S.Nothing
+  )
+})
+
+test("maybeTwoPair -> just two pair", t => {
+  t.deepEqual(
+    maybeTwoPair(twoPair),
+    S.Just({cards: S.map(newCard)(["4c", "4d", "2c", "2h", "Ah"]), rank: "Two Pair"})
+  )
+})
+
+test("maybeTwoPair -> Nothing; trips", t => {
+  t.deepEqual(
+    maybeTwoPair(trips),
+    S.Nothing
+  )
+})
+
+test("maybeTwoPair -> Nothing; straight", t => {
+  t.deepEqual(
+    maybeTwoPair(straight),
+    S.Nothing
+  )
+})
+
+test("maybeTwoPair -> Nothing; straight wheel", t => {
+  t.deepEqual(
+    maybeTwoPair(straightWheel),
+    S.Nothing
+  )
+})
+
+test("maybeTwoPair -> Nothing; flush", t => {
+  t.deepEqual(
+    maybeTwoPair(flush),
+    S.Nothing
+  )
+})
+
+test("maybeTwoPair -> Nothing; full house", t => {
+  t.deepEqual(
+    maybeTwoPair(fullHouse),
+    S.Nothing
+  )
+})
+
+test("maybeTwoPair -> Nothing; quads", t => {
+  t.deepEqual(
+    maybeTwoPair(quads),
     S.Nothing
   )
 })

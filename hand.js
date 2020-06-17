@@ -61,6 +61,16 @@ const maybeQuads = def("maybeQuads")({})([Cards, $.Maybe(Hand)])
     return S.map(cards => ({cards, rank: HAND_RANKS[7]}))(S.lift2(S.append)(maybeKicker)(maybeQuads))
   })
 
+//    maybeFullHouse :: Cards -> Maybe Hand
+const maybeFullHouse = def("maybeFullHouse")({})([Cards, $.Maybe(Hand)])
+  (cards => {
+    const xs = groupBy("rank")(sortBy("value")(cards))
+    const maybeTrips = S.find(x => x.length === 3)(xs)
+    const maybePair = S.find(x => x.length === 2)(xs)
+
+    return S.map(cards => ({cards, rank: HAND_RANKS[6]}))(S.lift2(S.concat)(maybeTrips)(maybePair))
+  })
+
 //    maybeTrips :: Cards -> Maybe Hand
 const maybeTrips = def("maybeTrips")({})([Cards, $.Maybe(Hand)])
   (cards => {
@@ -72,10 +82,23 @@ const maybeTrips = def("maybeTrips")({})([Cards, $.Maybe(Hand)])
     return S.map(cards => ({cards, rank: HAND_RANKS[3]}))(S.lift2(S.concat)(maybeTrips)(maybeKickers))
   })
 
+//    maybeTwoPair :: Cards -> Maybe Hand
+const maybeTwoPair = def("maybeTwoPair")({})([Cards, $.Maybe(Hand)])
+  (cards => {
+    const sorted = sortBy("value")(cards)
+    const xs = groupBy("rank")(sorted)
+    const maybePairs = S.take(4)(S.join(S.filter(x => x.length === 2)(xs)))
+    const maybeKicker = S.head(sorted)
+
+    return S.map(cards => ({cards, rank: HAND_RANKS[2]}))(S.lift2(S.append)(maybeKicker)(maybePairs))
+  })
+
 module.exports = {
   maybeFlush,
   maybeStraight,
   maybeStraightFlush,
   maybeQuads,
+  maybeFullHouse,
   maybeTrips,
+  maybeTwoPair,
 }
