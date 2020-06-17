@@ -9,6 +9,7 @@ const {
   maybeTrips,
   maybeTwoPair,
   maybePair,
+  maybeHighCard,
 } = require ("../hand")
 const {newCard} = require ("../card")
 
@@ -22,6 +23,13 @@ const flush = S.map(newCard)(["2h", "4c", "9h", "Ah", "7h", "Jh", "Tc"])
 const fullHouse = S.map(newCard)(["2c", "4d", "2h", "Ah", "4h", "2d", "Tc"])
 const quads = S.map(newCard)(["2c", "2d", "2h", "Ah", "4h", "2s", "Tc"])
 const straightFlush = S.map(newCard)(["2h", "4h", "3h", "Ah", "7h", "5h", "Tc"])
+
+test("maybeHighCard -> Just high card", t => {
+  t.deepEqual(
+    maybeHighCard(highCard),
+    S.Just({cards: S.map(newCard)(["Ah", "Jh", "Tc", "9h", "7h"]), rank: "High Card"})
+  )
+})
 
 test("maybeFlush -> Nothing; high card", t => {
   t.deepEqual(

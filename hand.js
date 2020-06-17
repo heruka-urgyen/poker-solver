@@ -103,6 +103,15 @@ const maybePair = def("maybePair")({})([Cards, $.Maybe(Hand)])
     return S.map(cards => ({cards, rank: HAND_RANKS[1]}))(S.lift2(S.concat)(maybePair)(maybeKickers))
   })
 
+//    maybeHighCard :: Cards -> Maybe Hand
+const maybeHighCard = def("maybeHighCard")({})([Cards, $.Maybe(Hand)])
+  (cards => {
+    const xs = sortBy("value")(cards)
+    const maybeHighCard = S.take(5)(xs)
+
+    return S.map(cards => ({cards, rank: HAND_RANKS[0]}))(maybeHighCard)
+  })
+
 module.exports = {
   maybeFlush,
   maybeStraight,
@@ -112,4 +121,5 @@ module.exports = {
   maybeTrips,
   maybeTwoPair,
   maybePair,
+  maybeHighCard,
 }
