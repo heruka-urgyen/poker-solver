@@ -1,6 +1,7 @@
 const $ = require("sanctuary-def")
 const S = require("sanctuary")
 const Descending = require("sanctuary-descending")
+const Pair = require("sanctuary-pair")
 
 const {def, HAND_RANKS, Card, Cards, Hand} = require("./types")
 
@@ -136,9 +137,44 @@ const solveHand = def("solveHand")({})([Cards, $.Maybe(Hand)])
       maybeTwoPair,
       maybePair,
       maybeHighCard
-    ])
-  )
+    ]))
+
+//    compareHands :: Hand -> Hand -> [Hand]
+const compareHands = def("compareHands")({})([Hand, Hand, $.Array(Hand)])
+  (h1 => h2 => {
+    const r1 = HAND_RANKS.indexOf(h1.rank)
+    const r2 = HAND_RANKS.indexOf(h2.rank)
+
+    if (r1 === r2) {
+      return S.extract(S.reduce
+        (acc => x => {
+          const count = Pair.fst(acc)
+          const res = Pair.snd(acc)
+
+          if (res.length === 0) {
+            const v1 = Pair.fst(x).value
+            const v2 = Pair.snd(x).value
+
+            if (v1 > v2) {return Pair(count + 1)([h1])}
+            if (v1 < v2) {return Pair(count + 1)([h2])}
+
+            if (count === 4) {
+              return Pair(count + 1)([h1, h2])
+            }
+          }
+
+          return Pair(count + 1)(res)
+        })
+        (Pair(0)([]))
+        (S.zip(h1.cards)(h2.cards)))
+    }
+
+    if (r1 > r2) {return [h1]}
+
+    return [h2]
+  })
 
 module.exports = {
   solveHand,
+  compareHands,
 }
