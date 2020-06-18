@@ -4,6 +4,7 @@ const $ = require("sanctuary-def")
 const env = $.env;
 const def = $.create({checkTypes: true, env})
 
+const CARD_SUITS = ["c", "d", "h", "s"]
 const CARD_RANKS =  ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]
 const HAND_RANKS =  [
   "High Card",
@@ -23,7 +24,7 @@ const Rank = $.NullaryType("Rank")("")([$.String])
 
 //    Suit :: Type
 const Suit = $.NullaryType("Suit")("")([$.String])
-  (x => /^c|d|h|s$/.test(x))
+  (x => CARD_SUITS.indexOf(x) > -1)
 
 //    Card :: Type
 const Card = $.NamedRecordType("Card")("")([])
@@ -39,11 +40,27 @@ const HandRank = $.NullaryType("HandRank")("")([$.String])
 const Hand = $.NamedRecordType("Hand")("")([])
   ({cards: Cards, rank: HandRank})
 
+//    Player :: Type
+const Player = $.NamedRecordType("Player")("")([])
+  ({id: $.PositiveInteger})
+
+//    Table :: Type
+const Table = $.NamedRecordType("Table")("")([])
+  ({
+    id: $.PositiveInteger,
+    maxPlayers: $.PositiveInteger,
+    players: $.Array(Player),
+    button: $.Integer,
+  })
+
 module.exports = {
   def,
   CARD_RANKS,
   Card,
   Cards,
+  CARD_SUITS,
   HAND_RANKS,
   Hand,
+  Player,
+  Table,
 }
