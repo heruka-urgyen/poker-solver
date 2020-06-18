@@ -174,7 +174,33 @@ const compareHands = def("compareHands")({})([Hand, Hand, $.Array(Hand)])
     return [h2]
   })
 
+
+//    selectWinningHands :: [Cards] -> [Hand]
+const selectWinningHands = def("selectWinningHands")({})([$.Array(Cards), $.Array(Hand)])
+  (css => {
+    const hands = S.map(S.compose(S.maybeToNullable)(solveHand))(css)
+
+    return S.extract(S.reduce
+      (acc => h => {
+        const f = Pair.fst(acc)
+        const currentBest = Pair.snd(acc)
+        const nextBest = f(h)
+        const nf = compareHands(nextBest[0])
+
+        if (currentBest.length > nextBest.length) {
+          if (!S.equals(nf(currentBest[0]))(nextBest)) {
+            return Pair(nf)(currentBest)
+          }
+        }
+
+        return Pair(nf)(nextBest)
+      })
+      (Pair(compareHands(hands[0]))([]))
+      (hands.slice(1)))
+  })
+
 module.exports = {
   solveHand,
   compareHands,
+  selectWinningHands,
 }

@@ -1,13 +1,14 @@
 const test = require("ava")
 const S = require("sanctuary")
 
-const {solveHand, compareHands} = require ("../hand")
+const {solveHand, compareHands, selectWinningHands} = require ("../hand")
 const {newCard} = require ("../card")
 
 const highCard = S.map(newCard)(["2c", "4c", "9h", "Ah", "7h", "Jh", "Tc"])
 const highCard2 = S.map(newCard)(["2d", "4s", "9c", "Ac", "7s", "Kc", "Td"])
 const pair = S.map(newCard)(["2c", "4c", "2h", "Ah", "7h", "Jh", "Tc"])
 const twoPair = S.map(newCard)(["2c", "4c", "2h", "Ah", "7h", "4d", "Tc"])
+const twoPair2 = S.map(newCard)(["2d", "4s", "2s", "Ac", "7s", "4h", "Td"])
 const trips = S.map(newCard)(["2c", "8d", "2h", "Ah", "7h", "2d", "Tc"])
 const straight = S.map(newCard)(["2c", "3d", "6h", "4h", "4c", "5d", "Kc"])
 const straight2 = S.map(newCard)(["2d", "3c", "6d", "4s", "4d", "5s", "Kd"])
@@ -16,6 +17,38 @@ const flush = S.map(newCard)(["2h", "4c", "9h", "Ah", "7h", "Jh", "Tc"])
 const fullHouse = S.map(newCard)(["2c", "4d", "2h", "Ah", "4h", "2d", "Tc"])
 const quads = S.map(newCard)(["2c", "2d", "2h", "Ah", "4h", "2s", "Tc"])
 const straightFlush = S.map(newCard)(["2h", "4h", "3h", "Ah", "7h", "5h", "Tc"])
+
+
+test("select winning hands from two", t => {
+  t.deepEqual(
+    selectWinningHands([highCard, highCard2]),
+    [{cards: S.map(newCard)(["Ac", "Kc", "Td", "9c", "7s"]), rank: "High Card"}]
+  )
+})
+
+test("select winning hands from three", t => {
+  t.deepEqual(
+    selectWinningHands([highCard, pair, twoPair]),
+    [{cards: S.map(newCard)(["4c", "4d", "2c", "2h", "Ah"]), rank: "Two Pair"}]
+  )
+})
+
+test("select winning hands with more than one winner", t => {
+  t.deepEqual(
+    selectWinningHands([straight, pair, twoPair, straight2, highCard]),
+    [
+      {cards: S.map(newCard)(["6h", "5d", "4h", "3d", "2c"]), rank: "Straight"},
+      {cards: S.map(newCard)(["6d", "5s", "4s", "3c", "2d"]), rank: "Straight"},
+    ]
+  )
+})
+
+test("select winning hands with one winner", t => {
+  t.deepEqual(
+    selectWinningHands([straight, pair, twoPair, straight2, highCard, quads]),
+    [{cards: S.map(newCard)(["2c", "2d", "2h", "2s", "Ah"]), rank: "Quads"}]
+  )
+})
 
 test("compare high card and pair", t => {
   t.deepEqual(
