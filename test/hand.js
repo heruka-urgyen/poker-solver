@@ -1,5 +1,6 @@
 const test = require("ava")
 const S = require("sanctuary")
+const Pair = require("sanctuary-pair")
 
 const {solveHand, compareHands, selectWinningHands} = require ("../hand")
 const {newCard} = require ("../card")
@@ -21,32 +22,45 @@ const straightFlush = S.map(newCard)(["2h", "4h", "3h", "Ah", "7h", "5h", "Tc"])
 
 test("select winning hands from two", t => {
   t.deepEqual(
-    selectWinningHands([highCard, highCard2]),
-    [{cards: S.map(newCard)(["Ac", "Kc", "Td", "9c", "7s"]), rank: "High Card"}]
+    selectWinningHands([Pair(1)(highCard), Pair(2)(highCard2)]),
+    [{cards: S.map(newCard)(["Ac", "Kc", "Td", "9c", "7s"]), rank: "High Card", playerId: 2}]
   )
 })
 
 test("select winning hands from three", t => {
   t.deepEqual(
-    selectWinningHands([highCard, pair, twoPair]),
-    [{cards: S.map(newCard)(["4c", "4d", "2c", "2h", "Ah"]), rank: "Two Pair"}]
+    selectWinningHands([Pair(1)(highCard), Pair(2)(pair), Pair(3)(twoPair)]),
+    [{cards: S.map(newCard)(["4c", "4d", "2c", "2h", "Ah"]), rank: "Two Pair", playerId: 3}]
   )
 })
 
 test("select winning hands with more than one winner", t => {
   t.deepEqual(
-    selectWinningHands([straight, pair, twoPair, straight2, highCard]),
+    selectWinningHands([
+      Pair(1)(straight),
+      Pair(2)(pair),
+      Pair(3)(twoPair),
+      Pair(4)(straight2),
+      Pair(5)(highCard)
+    ]),
     [
-      {cards: S.map(newCard)(["6h", "5d", "4h", "3d", "2c"]), rank: "Straight"},
-      {cards: S.map(newCard)(["6d", "5s", "4s", "3c", "2d"]), rank: "Straight"},
+      {cards: S.map(newCard)(["6h", "5d", "4h", "3d", "2c"]), rank: "Straight", playerId: 1},
+      {cards: S.map(newCard)(["6d", "5s", "4s", "3c", "2d"]), rank: "Straight", playerId: 4},
     ]
   )
 })
 
 test("select winning hands with one winner", t => {
   t.deepEqual(
-    selectWinningHands([straight, pair, twoPair, straight2, highCard, quads]),
-    [{cards: S.map(newCard)(["2c", "2d", "2h", "2s", "Ah"]), rank: "Quads"}]
+    selectWinningHands([
+      Pair(1)(straight),
+      Pair(2)(pair),
+      Pair(3)(twoPair),
+      Pair(4)(straight2),
+      Pair(5)(highCard),
+      Pair(6)(quads)
+    ]),
+    [{cards: S.map(newCard)(["2c", "2d", "2h", "2s", "Ah"]), rank: "Quads", playerId: 6}]
   )
 })
 

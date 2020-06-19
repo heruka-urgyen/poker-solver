@@ -175,10 +175,17 @@ const compareHands = def("compareHands")({})([Hand, Hand, $.Array(Hand)])
   })
 
 
-//    selectWinningHands :: [Cards] -> [Hand]
-const selectWinningHands = def("selectWinningHands")({})([$.Array(Cards), $.Array(Hand)])
+//    selectWinningHands :: [Pair Player.id Cards] -> [Hand]
+const selectWinningHands = def
+  ("selectWinningHands")
+  ({})
+  ([$.Array($.Pair($.PositiveInteger)(Cards)), $.Array(Hand)])
   (css => {
-    const hands = S.map(S.compose(S.maybeToNullable)(solveHand))(css)
+    const ids = S.map(Pair.fst)(css)
+    const cards = S.map(Pair.snd)(css)
+
+    const hands0 = S.map(S.compose(S.maybeToNullable)(solveHand))(cards)
+    const hands = S.map(h => ({...h, playerId: ids[hands0.indexOf(h)]}))(hands0)
 
     return S.extract(S.reduce
       (acc => h => {
