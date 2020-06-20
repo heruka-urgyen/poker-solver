@@ -119,6 +119,18 @@ const computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
     winners: selectWinningHands(S.map(S.map(S.concat(round.communityCards)))(round.cards))
   }))
 
+
+//    playRound :: Round -> Round
+const playRound = def("playRound")({})([Round, Round])
+  (r => {
+    const r1 = deal(r)(STREETS[0])
+    const r2 = deal(r1)(STREETS[1])
+    const r3 = deal(r2)(STREETS[2])
+    const r4 = deal(r3)(STREETS[3])
+
+    return computeRoundWinners(r4)
+  })
+
 module.exports = {
   newTable,
   sitPlayer,
@@ -126,4 +138,5 @@ module.exports = {
   shuffle,
   deal,
   computeRoundWinners,
+  playRound,
 }
