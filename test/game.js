@@ -53,14 +53,14 @@ test("newRound", t => {
 
 test("deal preflop", t => {
   t.deepEqual(
-    deal({
+    deal(STREETS[0])({
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
       deck,
       communityCards: [],
       cards: [],
       winners: [],
-    })(STREETS[0]),
+    }),
     {
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
@@ -78,7 +78,7 @@ test("deal preflop", t => {
 
 test("deal flop", t => {
   t.deepEqual(
-    deal({
+    deal(STREETS[1])({
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
       deck: deck.slice(6),
@@ -89,7 +89,7 @@ test("deal flop", t => {
         Pair(3)([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
       ],
       winners: [],
-    })(STREETS[1]),
+    }),
     {
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
@@ -111,7 +111,7 @@ test("deal flop", t => {
 
 test("deal turn", t => {
   t.deepEqual(
-    deal({
+    deal(STREETS[2])({
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
       deck: deck.slice(9),
@@ -126,7 +126,7 @@ test("deal turn", t => {
         Pair(3)([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
       ],
       winners: [],
-    })(STREETS[2]),
+    }),
     {
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
@@ -149,7 +149,7 @@ test("deal turn", t => {
 
 test("deal river", t => {
   t.deepEqual(
-    deal({
+    deal(STREETS[3])({
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
       deck: deck.slice(10),
@@ -165,7 +165,7 @@ test("deal river", t => {
         Pair(3)([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
       ],
       winners: [],
-    })(STREETS[3]),
+    }),
     {
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
@@ -264,7 +264,8 @@ test("computeRoundWinners", t => {
 
 test("play round", t => {
   t.deepEqual(
-    playRound(newRound(1)({id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 2})(deck)),
+    playRound
+      (newRound(1)({id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 2})(deck)),
     {
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},

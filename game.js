@@ -71,9 +71,9 @@ const newRound = def("newRound")({})([$.PositiveInteger, Table, Cards, Round])
     winners: [],
   }))
 
-//    deal :: Round -> Street -> Round
-const deal = def("deal")({})([Round, Street, Round])
-  (round => street => {
+//    deal :: Street -> Round -> Round
+const deal = def("deal")({})([Street, Round, Round])
+  (street => round => {
     if (street === STREETS[0]) {
       const {players} = round.table
       const {deck} = round
@@ -123,10 +123,10 @@ const computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
 //    playRound :: Round -> Round
 const playRound = def("playRound")({})([Round, Round])
   (r => {
-    const r1 = deal(r)(STREETS[0])
-    const r2 = deal(r1)(STREETS[1])
-    const r3 = deal(r2)(STREETS[2])
-    const r4 = deal(r3)(STREETS[3])
+    const r1 = deal(STREETS[0])(r)
+    const r2 = deal(STREETS[1])(r1)
+    const r3 = deal(STREETS[2])(r2)
+    const r4 = deal(STREETS[3])(r3)
 
     return computeRoundWinners(r4)
   })
