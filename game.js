@@ -57,17 +57,22 @@ const sitPlayer = def("sitPlayer")({})([Table, Player, Table])
     })(table)(player),
   }))
 
-//    newRound :: Int -> Table -> [Card] -> Round
-const newRound = def("newRound")({})([$.PositiveInteger, Table, Cards, Round])
-  (id => table => deck => ({
+//    newRound :: Int -> Table -> [Pair Player.id [Card]] -> [Card] -> Round
+const newRound = def
+  ("newRound")
+  ({})
+  ([$.PositiveInteger, Table, $.Array($.Pair($.PositiveInteger)(Cards)), Cards, Round])
+  (id => table => cards => deck => ({
     id,
-    deck,
-    communityCards: [],
     table: {
       ...table,
       button: (table.button + 1) % table.players.length,
     },
-    cards: [],
+    deck: S.filter(c => !S.elem(c)(S.chain(S.extract)(cards)))(deck),
+    communityCards: [],
+    cards: S.map
+      (p => S.fromMaybe(S.Pair(p.id)([]))(S.find(c => Pair.fst(c) === p.id)(cards)))
+      (table.players),
     winners: [],
   }))
 
@@ -75,14 +80,14 @@ const newRound = def("newRound")({})([$.PositiveInteger, Table, Cards, Round])
 const deal = def("deal")({})([Street, Round, Round])
   (street => round => {
     if (street === STREETS[0]) {
-      const {players} = round.table
+      const {players, button} = round.table
       const {deck} = round
 
       const cards = S.map
-        (p => S.Pair
-          (p.id)
-          ([deck[players.indexOf(p)], deck[players.indexOf(p) + players.length]]))
-        (players)
+        (c => S.map
+          (x => x.length === 2? x : [deck[Pair.fst(c)], deck[Pair.fst(c) + players.length]])
+          (Pair.snd(c)))
+        (S.map(c => Pair(round.cards.indexOf(c))(c))(round.cards))
 
       return {
         ...round,
@@ -138,5 +143,6 @@ module.exports = {
   shuffle,
   deal,
   computeRoundWinners,
+  shuffle,
   playRound,
 }

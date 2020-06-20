@@ -5,7 +5,7 @@ const Pair = require("sanctuary-pair")
 
 const {newTable, sitPlayer, newRound, deal, computeRoundWinners, playRound} = require ("../game")
 const {CARD_SUITS, CARD_RANKS, STREETS} = require("../types")
-const {newCard} = require("../card")
+const {newCard, showCard} = require("../card")
 
 const deck = S.chain(r => S.map(s => newCard(r + s))(CARD_SUITS))(CARD_RANKS)
 
@@ -39,13 +39,20 @@ test("sitPlayer at full table", t => {
 
 test("newRound", t => {
   t.deepEqual(
-    newRound(1)({id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 2})(deck),
+    newRound
+      (1)
+      ({id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 2})
+      ([Pair(2)([newCard("As"), newCard("Kc")])])
+      (deck),
     {
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
-      deck,
+      deck: S.filter(c => !(showCard(c) === "As" || showCard(c) === "Kc"))(deck),
       communityCards: [],
-      cards: [],
+      cards: [
+        Pair(1)([]),
+        Pair(2)([{rank: "A", suit: "s", value: 13}, {rank: "K", suit: "c", value: 12}]),
+        Pair(3)([])],
       winners: [],
     }
   )
@@ -58,7 +65,7 @@ test("deal preflop", t => {
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
       deck,
       communityCards: [],
-      cards: [],
+      cards: [Pair(1)([]), Pair(2)([]), Pair(3)([])],
       winners: [],
     }),
     {
@@ -265,7 +272,11 @@ test("computeRoundWinners", t => {
 test("play round", t => {
   t.deepEqual(
     playRound
-      (newRound(1)({id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 2})(deck)),
+      (newRound
+        (1)
+        ({id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 2})
+        ([Pair(1)([]), Pair(2)([]), Pair(3)([])])
+        (deck)),
     {
       id: 1,
       table: {id: 1, maxPlayers: 3, players: [{id: 1}, {id: 2}, {id: 3}], button: 0},
