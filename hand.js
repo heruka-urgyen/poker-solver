@@ -65,9 +65,9 @@ const maybeQuads = def("maybeQuads")({})([Cards, $.Maybe(Hand)])
 //    maybeFullHouse :: Cards -> Maybe Hand
 const maybeFullHouse = def("maybeFullHouse")({})([Cards, $.Maybe(Hand)])
   (cards => {
-    const xs = groupBy("rank")(sortBy("value")(cards))
-    const maybeTrips = S.find(x => x.length === 3)(xs)
-    const maybePair = S.find(x => x.length === 2)(xs)
+    const xs = sortBy("length")(groupBy("rank")(sortBy("value")(cards)))
+    const maybeTrips = S.find(x => x.length === 3)([xs[0]])
+    const maybePair = S.chain(S.take(2))(S.find(x => x.length >= 2)([xs[1]]))
 
     return S.map(cards => ({cards, rank: HAND_RANKS[6]}))(S.lift2(S.concat)(maybeTrips)(maybePair))
   })
@@ -194,10 +194,8 @@ const selectWinningHands = def
         const nextBest = f(h)
         const nf = compareHands(nextBest[0])
 
-        if (currentBest.length > nextBest.length) {
-          if (!S.equals(nf(currentBest[0]))(nextBest)) {
-            return Pair(nf)(currentBest)
-          }
+        if (currentBest.indexOf(nextBest[0]) > -1) {
+          return Pair(nf)(S.concat(currentBest)(nextBest.slice(1)))
         }
 
         return Pair(nf)(nextBest)
