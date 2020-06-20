@@ -62,6 +62,7 @@ const Round = $.NamedRecordType("Round")("")([])
     deck: Cards,
     communityCards: Cards,
     cards: $.Array($.Pair($.PositiveInteger)(Cards)),
+    winners: $.Array($.Object),
   })
 
 //    Street :: Type

@@ -15,8 +15,7 @@ const {
   STREETS,
 } = require("./types")
 const {newCard} = require("./card")
-
-const DECK = S.chain(r => S.map(s => newCard(r + s))(CARD_SUITS))(CARD_RANKS)
+const {selectWinningHands} = require("./hand")
 
 const shuffle = deck => {
   const sorted = [...deck]
@@ -69,6 +68,7 @@ const newRound = def("newRound")({})([$.PositiveInteger, Table, Cards, Round])
       button: (table.button + 1) % table.players.length,
     },
     cards: [],
+    winners: [],
   }))
 
 //    deal :: Round -> Street -> Round
@@ -112,7 +112,12 @@ const deal = def("deal")({})([Round, Street, Round])
     }
   })
 
-
+//    computeRoundWinners :: Round -> Round
+const computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
+  (round => ({
+    ...round,
+    winners: selectWinningHands(S.map(S.map(S.concat(round.communityCards)))(round.cards))
+  }))
 
 module.exports = {
   newTable,
@@ -120,4 +125,5 @@ module.exports = {
   newRound,
   shuffle,
   deal,
+  computeRoundWinners,
 }
