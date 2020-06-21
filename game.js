@@ -85,7 +85,9 @@ const deal = def("deal")({})([Street, Round, Round])
 
       const cards = S.map
         (c => S.map
-          (x => x.length === 2? x : [deck[Pair.fst(c)], deck[Pair.fst(c) + players.length]])
+          (x => x.length === 2? x : [
+            deck[(Pair.fst(c) + button + 1) % (players.length)],
+            deck[(Pair.fst(c) + button + 1) % (players.length) + players.length]])
           (Pair.snd(c)))
         (S.map(c => Pair(round.cards.indexOf(c))(c))(round.cards))
 
