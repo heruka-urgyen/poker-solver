@@ -43,7 +43,7 @@ const Hand = $.NamedRecordType("Hand")("")([])
 
 //    Player :: Type
 const Player = $.NamedRecordType("Player")("")([])
-  ({id: $.PositiveInteger})
+  ({id: $.String})
 
 //    Table :: Type
 const Table = $.NamedRecordType("Table")("")([])
@@ -61,7 +61,7 @@ const Round = $.NamedRecordType("Round")("")([])
     table: Table,
     deck: Cards,
     communityCards: Cards,
-    cards: $.Array($.Pair($.PositiveInteger)(Cards)),
+    cards: $.Array($.Pair($.String)(Cards)),
     winners: $.Array($.Object),
   })
 

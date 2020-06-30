@@ -61,7 +61,7 @@ const sitPlayer = def("sitPlayer")({})([Table, Player, Table])
 const newRound = def
   ("newRound")
   ({})
-  ([$.PositiveInteger, Table, $.Array($.Pair($.PositiveInteger)(Cards)), Cards, Round])
+  ([$.PositiveInteger, Table, $.Array($.Pair(Player.types.id)(Cards)), Cards, Round])
   (id => table => cards => deck => ({
     id,
     table: {

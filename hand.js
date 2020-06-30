@@ -3,7 +3,7 @@ const S = require("sanctuary")
 const Descending = require("sanctuary-descending")
 const Pair = require("sanctuary-pair")
 
-const {def, HAND_RANKS, Card, Cards, Hand} = require("./types")
+const {def, HAND_RANKS, Card, Cards, Hand, Player} = require("./types")
 
 const sortBy = s => S.sortBy(x => Descending(x[s]))
 const groupBy = s => S.groupBy(x => y => x[s] === y[s])
@@ -179,7 +179,7 @@ const compareHands = def("compareHands")({})([Hand, Hand, $.Array(Hand)])
 const selectWinningHands = def
   ("selectWinningHands")
   ({})
-  ([$.Array($.Pair($.PositiveInteger)(Cards)), $.Array(Hand)])
+  ([$.Array($.Pair(Player.types.id)(Cards)), $.Array(Hand)])
   (css => {
     const ids = S.map(Pair.fst)(css)
     const cards = S.map(Pair.snd)(css)
