@@ -17,20 +17,6 @@ const {
 const {newCard} = require("./card")
 const {selectWinningHands} = require("./hand")
 
-const shuffle = deck => {
-  const sorted = [...deck]
-
-  for (let i = sorted.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * i)
-    const temp = sorted[i]
-
-    sorted[i] = sorted[j]
-    sorted[j] = temp
-  }
-
-  return sorted
-}
-
 //    newTable :: Int -> Int -> Table
 const newTable = def("newTable")({})([$.PositiveInteger, $.PositiveInteger, Table])
   (id => maxPlayers => ({
@@ -142,7 +128,6 @@ module.exports = {
   newTable,
   sitPlayer,
   newRound,
-  shuffle,
   deal,
   computeRoundWinners,
   playRound,

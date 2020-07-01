@@ -2,9 +2,9 @@ const test = require("ava")
 const S = require("sanctuary")
 const Pair = require("sanctuary-pair")
 
-const {solveHand, compareHands, selectWinningHands} = require ("../hand")
-const {newCard, newDeck} = require ("../card")
-const {CARD_SUITS, CARD_RANKS, STREETS} = require("../types")
+const {solveHand, compareHands, selectWinningHands} = require ("../src/hand")
+const {newCard, newDeck} = require ("../src/card")
+const {CARD_SUITS, CARD_RANKS, STREETS} = require("../src/types")
 
 const highCard = S.map(newCard)(["2c", "4c", "9h", "Ah", "7h", "Jh", "Tc"])
 const highCard2 = S.map(newCard)(["2d", "4s", "9c", "Ac", "7s", "Kc", "Td"])

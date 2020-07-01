@@ -1,7 +1,7 @@
 const test = require("ava")
 
 const S = require("sanctuary")
-const {showCard, newCard, sortCardsBy} = require ("../card")
+const {showCard, newCard, sortCardsBy} = require ("../src/card")
 
 test("newCard", t => {
   t.deepEqual(newCard("2c"), {rank: "2", suit: "c", value: 1})

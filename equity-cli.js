@@ -5,9 +5,7 @@ const Pair = require("sanctuary-pair")
 const {argv} = require("yargs")
 const cliProgress = require("cli-progress")
 
-const {newRound, playRound} = require("./game")
-const {CARD_SUITS, CARD_RANKS} = require("./types")
-const {newCard, newDeck} = require("./card")
+const {newRound, playRound, newCard, newDeck} = require("./index")
 
 // cli arguments
 // p - number of players
