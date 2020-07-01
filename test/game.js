@@ -4,10 +4,10 @@ const S = require("sanctuary")
 const Pair = require("sanctuary-pair")
 
 const {newTable, sitPlayer, newRound, deal, computeRoundWinners, playRound} = require ("../game")
-const {CARD_SUITS, CARD_RANKS, STREETS} = require("../types")
-const {newCard, showCard} = require("../card")
+const {STREETS} = require("../types")
+const {newCard, showCard, newDeck} = require("../card")
 
-const deck = S.chain(r => S.map(s => newCard(r + s))(CARD_SUITS))(CARD_RANKS)
+const deck = newDeck("order")
 
 test("newTable", t => {
   t.deepEqual(

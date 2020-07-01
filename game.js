@@ -145,6 +145,5 @@ module.exports = {
   shuffle,
   deal,
   computeRoundWinners,
-  shuffle,
   playRound,
 }

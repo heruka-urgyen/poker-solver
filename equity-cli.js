@@ -5,12 +5,14 @@ const Pair = require("sanctuary-pair")
 const {argv} = require("yargs")
 const cliProgress = require("cli-progress")
 
-const {shuffle, newRound, playRound} = require("./game")
+const {newRound, playRound} = require("./game")
 const {CARD_SUITS, CARD_RANKS} = require("./types")
-const {newCard} = require("./card")
+const {newCard, newDeck} = require("./card")
 
-const deck = S.chain(r => S.map(s => newCard(r + s))(CARD_SUITS))(CARD_RANKS)
-
+// cli arguments
+// p - number of players
+// n - number of iterations
+// h - hand
 const {p, n, h} = argv
 const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic)
 
@@ -41,7 +43,7 @@ const result = S.reduce
               players: S.map(p => ({id: `${p}`}))(S.range(1)(p + 1)),
               button: (i - 1) % p})
             ([Pair("1")(S.map(newCard)(h.match(/.{2,2}/g)))])
-            (shuffle(deck))).winners))
+            (newDeck("shuffle"))).winners))
     (S.range(1)(n + 1)))
 
 bar1.stop()
