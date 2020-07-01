@@ -1,13 +1,13 @@
 {
-  "name": "poker-solver",
-  "version": "1.0.0",
+  "name": "@heruka_urgyen/poker-solver",
+  "version": "1.0.1",
   "description": "",
-  "main": "./equity-cli.js",
+  "main": "./index.js",
   "scripts": {
     "test": "npx ava --watch --verbose"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "github.com/heruka-urgyen",
+  "license": "MIT",
   "dependencies": {
     "cli-progress": "^3.8.2",
     "sanctuary": "^3.0.0",
