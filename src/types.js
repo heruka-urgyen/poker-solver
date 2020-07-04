@@ -69,6 +69,27 @@ const Round = $.NamedRecordType("Round")("")([])
 const Street = $.NullaryType("Street")("")([$.String])
   (x => STREETS.indexOf(x) > -1)
 
+//    Bet :: Type
+const Bet = $.NamedRecordType("Bet")("")([])
+  ({
+    playerId: Player.types.id,
+    amount: $.NonNegativeInteger,
+  })
+
+//    Pot :: Type
+const Pot = $.NamedRecordType("Pot")("")([])
+  ({
+    players: $.Array(Player.types.id),
+    amount: $.NonNegativeInteger,
+  })
+
+//    Pots :: Type
+const Pots = $.NamedRecordType("Pots")("")([])
+  ({
+    pots: $.Array(Pot),
+    return: $.Array(Bet),
+  })
+
 module.exports = {
   def,
   CARD_RANKS,
@@ -82,4 +103,6 @@ module.exports = {
   Round,
   Street,
   STREETS,
+  Bet,
+  Pots,
 }
