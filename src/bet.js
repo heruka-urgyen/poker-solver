@@ -46,6 +46,64 @@ const calculatePots = def("calculatePots")({})([$.Array(Bet), Pots])
         ([{bets: [], m: 0, amount: 0}])
         (bets))))
 
-module.exports = {
-  calculatePots,
+const bet = ({players, bets, bet}) => {
+  const updatedPlayers = S.map(p => {
+    if (p.playerId === bet.playerId) {
+      return {...p, stack: p.stack - bet.amount}
+    }
+
+    return p
+  })(players)
+
+  const updatedBets = S.reduce
+    (acc => bet => {
+      if (S.filter(b => b.playerId === bet.playerId)(acc).length > 0) {
+        return S.map(b => {
+          if (b.playerId === bet.playerId) {
+            return {
+              ...b,
+              amount: b.amount + bet.amount,
+            }
+          }
+
+          return b
+        })(acc)
+      }
+
+      return S.append(bet)(acc)
+    })
+    ([])
+    (S.append(bet)(bets))
+
+  const balanced =  updatedBets.length >= players.length
+    && updatedBets.every((bet, _, bets) => bet.amount === bets[0].amount)
+
+  const everyoneAllIn =
+    S.filter(p => p.stack === 0)(updatedPlayers).length === updatedPlayers.length
+
+  const playersNotAllIn = S.filter(p => p.stack !== 0)(updatedPlayers)
+
+  const betsNotAllIn = S.filter
+    (b => S.map(p => p.playerId)(playersNotAllIn).indexOf(b.playerId) > -1)(updatedBets)
+
+  const balancedAndSomeAllIn = betsNotAllIn.length > 1 &&
+    betsNotAllIn.every((bet, _, bets) => bet.amount === bets[0].amount)
+
+  if (everyoneAllIn || balancedAndSomeAllIn) {
+    return {
+      balanced: true,
+      players: updatedPlayers,
+      bets: [],
+      pots: calculatePots(updatedBets),
+    }
+  }
+
+  return {
+    balanced,
+    players: updatedPlayers,
+    bets: balanced? [] : updatedBets,
+    pots: balanced? calculatePots(updatedBets) : {},
+  }
 }
+
+module.exports = {calculatePots, bet}
