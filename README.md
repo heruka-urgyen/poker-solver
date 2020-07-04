@@ -26,3 +26,19 @@ node equity-cli.js -p 9 -n 100 -h AcKs
 // output
 equity: 19%
 ```
+
+To calculate side pots
+
+```
+node calculate-pots.js --ids id1 id2 ... idn --bets bet1 bet2 ... betn
+
+// input
+node calculate-pots.js --ids x y z --bets 100 25 120
+
+// output
+{ pots:
+   [ { amount: 75, players: [ 'x', 'y', 'z' ] },
+     { amount: 150, players: [ 'x', 'z' ] } ],
+  return: [ { playerId: 'z', amount: 20 } ] }
+equity: 19%
+```
