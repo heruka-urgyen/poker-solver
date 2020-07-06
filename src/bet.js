@@ -1,5 +1,6 @@
 const $ = require("sanctuary-def")
 const S = require("sanctuary")
+const Pair = require("sanctuary-pair")
 
 const {
   def,
@@ -46,7 +47,9 @@ const calculatePots = def("calculatePots")({})([$.Array(Bet), Pots])
         ([{bets: [], m: 0, amount: 0}])
         (bets))))
 
-const bet = ({players, bets, bet}) => {
+const bet = bet => state => {
+  const {bets, players} = state
+
   const updatedPlayers = S.map(p => {
     if (p.playerId === bet.playerId) {
       return {...p, stack: p.stack - bet.amount}
@@ -75,35 +78,121 @@ const bet = ({players, bets, bet}) => {
     ([])
     (S.append(bet)(bets))
 
+  const updateWhoActed = bets => s => {
+    const reversedBets = [...bets].reverse()
+    const b = bets.find(p => p.playerId === bet.playerId)
+    const i = reversedBets.findIndex(p => p.playerId === bet.playerId)
+
+    if (b.amount > reversedBets[(i + 1) % bets.length].amount) {
+      return [bet.playerId]
+    } else {
+      return s.whoActed.concat(bet.playerId)
+    }
+  }
+  const whoActed = updateWhoActed(updatedBets)(state)
+  const nextPlayer = (
+    players.findIndex(p => p.playerId === whoActed[whoActed.length - 1]) + 1) % players.length
+
   const balanced =  updatedBets.length >= players.length
     && updatedBets.every((bet, _, bets) => bet.amount === bets[0].amount)
 
+  const everyoneActed = whoActed.length === players.length
   const everyoneAllIn =
     S.filter(p => p.stack === 0)(updatedPlayers).length === updatedPlayers.length
+
+  const someAllIn = S.filter(p => p.stack === 0)(updatedPlayers).length > 0
 
   const playersNotAllIn = S.filter(p => p.stack !== 0)(updatedPlayers)
 
   const betsNotAllIn = S.filter
     (b => S.map(p => p.playerId)(playersNotAllIn).indexOf(b.playerId) > -1)(updatedBets)
 
-  const balancedAndSomeAllIn = betsNotAllIn.length > 1 &&
+  const balancedAndSomeAllIn = someAllIn && betsNotAllIn.length > 1 &&
     betsNotAllIn.every((bet, _, bets) => bet.amount === bets[0].amount)
 
   if (everyoneAllIn || balancedAndSomeAllIn) {
-    return {
-      balanced: true,
+    const result = {
       players: updatedPlayers,
       bets: [],
       pots: calculatePots(updatedBets),
     }
+
+    return {
+      state: {
+        ...state,
+        ...result,
+        nextPlayer,
+      },
+      result,
+    }
+  }
+
+  const result = {
+    players: updatedPlayers,
+    bets: everyoneActed && balanced? [] : updatedBets,
+    pots: everyoneActed && balanced? calculatePots(updatedBets) : {},
   }
 
   return {
-    balanced,
-    players: updatedPlayers,
-    bets: balanced? [] : updatedBets,
-    pots: balanced? calculatePots(updatedBets) : {},
+    state: {
+      ...state,
+      ...result,
+      whoActed,
+    },
+    result,
   }
 }
 
-module.exports = {calculatePots, bet}
+const updateStack = bets => player => {
+  const bet = bets.find(bet => bet.playerId === player.playerId)
+
+  if (!bet) {return player}
+
+  return {
+    ...player,
+    stack: player.stack - bet.amount,
+  }
+}
+
+const postBlinds = state => {
+  const {blinds, players, button} = state
+  const getPlayersOnBlinds = players.length === 2?
+    (_, i) => i === button || i === (button + 1) % players.length :
+    (_, i) => i === (button + 1) % players.length || i === (button + 2) % players.length
+
+  const bets = players
+    .filter(getPlayersOnBlinds)
+    .map((p, i) => ({playerId: p.playerId, amount: blinds[i]}))
+
+  const result = {
+    bets,
+    players: players.map(updateStack(bets)),
+  }
+
+  return {
+    state: {...state, ...result},
+    result,
+  }
+}
+
+const newRound = initialState => {
+  const state = {
+    ...initialState,
+    whoActed: [],
+  }
+
+  const recur = (fs, s, res) => {
+    if (fs.length === 0) {return res}
+
+    const f = fs[0]
+    const {state, result} = f(s)
+
+    return recur(fs.slice(1), state, res.concat(result))
+  }
+
+
+  return update => update((...fs) => recur(fs, state, []))
+}
+
+module.exports = {calculatePots, newRound, postBlinds, bet}
+
