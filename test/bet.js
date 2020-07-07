@@ -56,6 +56,48 @@ test("calculate pots 3", t => {
   )
 })
 
+test("2-player: call - call", t => {
+  const initialState = {
+    players: [{playerId: "1", stack: 50}, {playerId: "2", stack: 30}],
+    blinds: [1, 2],
+    bets: [],
+    button: 0,
+    pots: {
+      pots: [{amount: 4, players: ["1", "2"]}],
+      return: [],
+    },
+  }
+
+  const res1 = {
+    players: [{playerId: "1", stack: 50}, {playerId: "2", stack: 30}],
+    bets: [{playerId: "1", amount: 0}],
+    pots: {
+      pots: [{amount: 4, players: ["1", "2"]}],
+      return: [],
+    },
+  }
+
+  const res2 = {
+    players: [{playerId: "1", stack: 50}, {playerId: "2", stack: 30}],
+    bets: [],
+    pots: {
+      pots: [{amount: 4, players: ["1", "2"]}],
+      return: [],
+    },
+  }
+
+
+  newRound(initialState)(update => {
+    const [r1, r2] = update(
+      bet({playerId: "1", amount: 0}),
+      bet({playerId: "2", amount: 0}),
+    )
+
+    t.deepEqual(r1, res1)
+    t.deepEqual(r2, res2)
+  })
+})
+
 test("2-player: call - check", t => {
   const initialState = {
     players: [{playerId: "1", stack: 50}, {playerId: "2", stack: 30}],

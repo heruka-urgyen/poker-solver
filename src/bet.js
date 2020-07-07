@@ -8,6 +8,41 @@ const {
   Pots,
 } = require("./types")
 
+const combinePots = pots1 => pots2 => {
+  if (!pots1 && !pots2) {return {}}
+  if (!pots1 || !pots1.pots) {return pots2}
+  if (!pots2 || !pots2.pots) {return pots1}
+
+  return {
+    pots: pots1.pots.concat(pots2.pots).reduce((acc, pot) => {
+      const equalPlayers = p => S.equals(S.sort(p.players))(S.sort(pot.players))
+
+      if (acc.find(equalPlayers)) {
+        return acc.map(p => {
+          if (equalPlayers(p)) {
+            return {...p, amount: pot.amount + p.amount}
+          }
+          return p
+        })
+      }
+
+      return acc.concat(pot)
+    }, []),
+    return: pots1.return.concat(pots2.return).reduce((acc, pot) => {
+      if (acc.find(p => S.equals(p.playerId)(pot.playerId))) {
+        return acc.map(p => {
+          if (S.equals(pot.playerId)(p.playerId)) {
+            return {...p, amount: pot.amount + p.amount}
+          }
+          return p
+        })
+      }
+
+      return acc.concat(pot)
+    }, [])
+  }
+}
+
 //    calculatePots :: [Bet] -> Pots
 const calculatePots = def("calculatePots")({})([$.Array(Bet), Pots])
   (bets => S.reduce
@@ -78,7 +113,7 @@ const bet = bet => state => {
     ([])
     (S.append(bet)(bets))
 
-  const updateWhoActed = bets => s => {
+  const updateWhoActed = bets => ({whoActed = []}) => {
     const reversedBets = [...bets].reverse()
     const b = bets.find(p => p.playerId === bet.playerId)
     const i = reversedBets.findIndex(p => p.playerId === bet.playerId)
@@ -86,7 +121,10 @@ const bet = bet => state => {
     if (b.amount > reversedBets[(i + 1) % bets.length].amount) {
       return [bet.playerId]
     } else {
-      return s.whoActed.concat(bet.playerId)
+      return whoActed.concat(bet.playerId).reduce((acc, id) => {
+        if (acc.indexOf(id) > -1) {return acc}
+        return acc.concat(id)
+      }, [])
     }
   }
   const whoActed = updateWhoActed(updatedBets)(state)
@@ -114,7 +152,7 @@ const bet = bet => state => {
     const result = {
       players: updatedPlayers,
       bets: [],
-      pots: calculatePots(updatedBets),
+      pots: combinePots(state.pots)(calculatePots(updatedBets)),
     }
 
     return {
@@ -122,6 +160,7 @@ const bet = bet => state => {
         ...state,
         ...result,
         nextPlayer,
+        whoActed,
       },
       result,
     }
@@ -130,13 +169,15 @@ const bet = bet => state => {
   const result = {
     players: updatedPlayers,
     bets: everyoneActed && balanced? [] : updatedBets,
-    pots: everyoneActed && balanced? calculatePots(updatedBets) : {},
+    pots: everyoneActed && balanced?
+      combinePots(state.pots)(calculatePots(updatedBets)) : (state.pots || {}),
   }
 
   return {
     state: {
       ...state,
       ...result,
+      nextPlayer,
       whoActed,
     },
     result,
@@ -178,7 +219,6 @@ const postBlinds = state => {
 const newRound = initialState => {
   const state = {
     ...initialState,
-    whoActed: [],
   }
 
   const recur = (fs, s, res) => {
