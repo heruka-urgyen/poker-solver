@@ -88,6 +88,9 @@ const deal = def("deal")({})([Street, Round, Round])
     if (street === STREETS[0]) {
       const {players, button} = round
       const {deck} = round
+      const holeCards = round.cards.length === 0?
+        round.players.map(id => Pair(id)([])) :
+        round.cards
 
       const cards = S.map
         (c => S.map
@@ -95,7 +98,7 @@ const deal = def("deal")({})([Street, Round, Round])
             deck[(Pair.fst(c) + button + 1) % (players.length)],
             deck[(Pair.fst(c) + button + 1) % (players.length) + players.length]])
           (Pair.snd(c)))
-        (S.map(c => Pair(round.cards.indexOf(c))(c))(round.cards))
+        (S.map(c => Pair(holeCards.indexOf(c))(c))(holeCards))
 
       return {
         ...round,
