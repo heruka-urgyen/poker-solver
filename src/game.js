@@ -123,19 +123,14 @@ const playRound = def("playRound")({})([Round, Round])
     return computeRoundWinners(r4)
   })
 
-const runGame = state => {
-  const recur = (fs, s, res) => {
-    if (fs.length === 0) {
-      return res
-    }
+const newGame = state => {
+  let _state = state
 
-    const f = fs[0]
-    const {state, result} = f(s)
-
-    return recur(fs.slice(1), state, S.concat(res)([[result, state]]))
+  return f => {
+    const res = f(_state)
+    _state = res
+    return res
   }
-
-  return update => update((...fs) => recur(fs, state, []))
 }
 
 module.exports = {
@@ -145,5 +140,5 @@ module.exports = {
   deal,
   computeRoundWinners,
   playRound,
-  runGame,
+  newGame,
 }

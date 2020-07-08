@@ -156,13 +156,10 @@ const bet = bet => state => {
     }
 
     return {
-      state: {
-        ...state,
-        ...result,
-        nextPlayer,
-        whoActed,
-      },
-      result,
+      ...state,
+      ...result,
+      nextPlayer,
+      whoActed,
     }
   }
 
@@ -174,13 +171,10 @@ const bet = bet => state => {
   }
 
   return {
-    state: {
-      ...state,
-      ...result,
-      nextPlayer,
-      whoActed,
-    },
-    result,
+    ...state,
+    ...result,
+    nextPlayer,
+    whoActed,
   }
 }
 
@@ -211,8 +205,8 @@ const postBlinds = state => {
   }
 
   return {
-    state: {...state, ...result},
-    result,
+    ...state,
+    ...result,
   }
 }
 
