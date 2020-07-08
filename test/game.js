@@ -7,12 +7,15 @@ const {
   newTable,
   sitPlayer,
   newRoundExtended,
+  newRound,
   deal,
   computeRoundWinners,
-  playRound
+  playRound,
+  newGame,
 } = require ("../src/game")
 const {STREETS} = require("../src/types")
 const {newCard, showCard, newDeck} = require("../src/card")
+const {postBlinds, bet} = require("../src/bet")
 
 const deck = newDeck("order")
 
@@ -79,7 +82,7 @@ test("deal preflop", t => {
       tableId: 1,
       deck,
       communityCards: [],
-      cards: [Pair("1")([]), Pair("2")([]), Pair("3")([])],
+      cards: [],
       button: 2,
       blinds: Pair(1)(2),
       bets: [],
@@ -331,4 +334,103 @@ test("computeRoundWinners", t => {
       ],
     }
   )
+})
+
+test("play round", t => {
+  const table =
+    sitPlayer(sitPlayer(newTable(1)(2))({id: "1", stack: 100}))({id: "2", stack: 100})
+  const round = newRound(1)(table)(0)(Pair(1)(2))
+
+  const run = newGame({table, round})
+  const [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14] = [
+    postBlinds,
+    s => ({...s, round: deal(STREETS[0])(s.round)}),
+    bet({playerId: "1", amount: 1}),
+    bet({playerId: "2", amount: 0}),
+    s => ({...s, round: deal(STREETS[1])(s.round)}),
+    bet({playerId: "1", amount: 10}),
+    bet({playerId: "2", amount: 10}),
+    s => ({...s, round: deal(STREETS[2])(s.round)}),
+    bet({playerId: "1", amount: 0}),
+    bet({playerId: "2", amount: 0}),
+    s => ({...s, round: deal(STREETS[3])(s.round)}),
+    bet({playerId: "1", amount: 88}),
+    bet({playerId: "2", amount: 88}),
+    s => ({...s, round: computeRoundWinners(s.round)}),
+  ].map(run)
+
+  t.deepEqual(
+    r1.round.bets,
+    [{playerId: "1", amount: 1}, {playerId: "2", amount: 2}],
+  )
+
+  t.deepEqual(
+    S.chain(S.extract)(r2.round.cards).length,
+    4,
+  )
+
+  t.deepEqual(
+    r3.round.bets,
+    [{playerId: "1", amount: 2}, {playerId: "2", amount: 2}],
+  )
+
+  t.deepEqual(
+    r4.round.pots,
+    {pots: [{amount: 4, players: ["1", "2"]}], return: []},
+  )
+
+  t.deepEqual(
+    r5.round.communityCards.length,
+    3,
+  )
+
+  t.deepEqual(
+    r6.round.bets,
+    [{playerId: "1", amount: 10}],
+  )
+
+  t.deepEqual(
+    r6.table.players,
+    [{id: "1", stack: 88}, {id: "2", stack: 98}],
+  )
+
+  t.deepEqual(
+    r7.round.pots,
+    {pots: [{amount: 24, players: ["1", "2"]}], return: []},
+  )
+
+  t.deepEqual(
+    r8.round.communityCards.length,
+    4,
+  )
+
+  t.deepEqual(
+    r9.table.players,
+    [{id: "1", stack: 88}, {id: "2", stack: 88}],
+  )
+
+  t.deepEqual(
+    r10.round.pots,
+    {pots: [{amount: 24, players: ["1", "2"]}], return: []},
+  )
+
+  t.deepEqual(
+    r11.round.communityCards.length,
+    5,
+  )
+
+  t.deepEqual(
+    r12.table.players,
+    [{id: "1", stack: 0}, {id: "2", stack: 88}],
+  )
+
+  t.deepEqual(
+    r13.round.pots,
+    {pots: [{amount: 200, players: ["1", "2"]}], return: []},
+  )
+
+  t.true(
+    r14.round.winners.length > 0
+  )
+
 })
