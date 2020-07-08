@@ -24,6 +24,26 @@ const table3 = {
     {id: "3", stack: 70},
     {id: "4", stack: 65}],}
 
+test("2-player: post blinds", t => {
+  const initialState = {
+    table: table1,
+    round: newRound(1)(table1)(0)(Pair(1)(2)),
+  }
+
+  const res1 = {
+    players: [{id: "1", stack: 49}, {id: "2", stack: 28}],
+    bets: [{playerId: "1", amount: 1}, {playerId: "2", amount: 2}],
+    pots: {pots: [], return: []},
+  }
+
+  const run = newGame(initialState)
+  const [r1] = [
+    postBlinds,
+  ].map(run).map(({table: {players}, round: {bets, pots}}) => ({players, bets, pots}))
+
+  t.deepEqual(r1, res1)
+})
+
 test("2-player: call - call", t => {
   const initialState = {
     table: table1,
