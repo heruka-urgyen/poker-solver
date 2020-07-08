@@ -5,43 +5,38 @@ const Pair = require("sanctuary-pair")
 const {
   def,
   Bet,
+  Bets,
+  Player,
   Pots,
+  Game,
 } = require("./types")
 
-const combinePots = pots1 => pots2 => {
-  if (!pots1 && !pots2) {return {}}
-  if (!pots1 || !pots1.pots) {return pots2}
-  if (!pots2 || !pots2.pots) {return pots1}
+//    combinePots :: Pots -> Pots -> Pots
+const combinePots = def("combinePots")({})([Pots, Pots, Pots])
+  (pots1 => pots2 => {
+    const reduce = pred => xs =>
+      S.reduce(acc => pot => {
+        if (acc.find(pred(pot))) {
+          return S.map(p => {
+            if (pred(pot)(p)) {
+              return {...p, amount: pot.amount + p.amount}
+            }
+            return p
+          })(acc)
+        }
 
-  return {
-    pots: pots1.pots.concat(pots2.pots).reduce((acc, pot) => {
-      const equalPlayers = p => S.equals(S.sort(p.players))(S.sort(pot.players))
+        return S.append(pot)(acc)
+      })([])(xs)
 
-      if (acc.find(equalPlayers)) {
-        return acc.map(p => {
-          if (equalPlayers(p)) {
-            return {...p, amount: pot.amount + p.amount}
-          }
-          return p
-        })
-      }
-
-      return acc.concat(pot)
-    }, []),
-    return: pots1.return.concat(pots2.return).reduce((acc, pot) => {
-      if (acc.find(p => S.equals(p.playerId)(pot.playerId))) {
-        return acc.map(p => {
-          if (S.equals(pot.playerId)(p.playerId)) {
-            return {...p, amount: pot.amount + p.amount}
-          }
-          return p
-        })
-      }
-
-      return acc.concat(pot)
-    }, [])
-  }
-}
+    return {
+      pots: reduce
+        (pot => p => S.equals(S.sort(p.players))(S.sort(pot.players)))
+        (S.concat(pots1.pots)(pots2.pots)),
+      return: reduce
+        (pot => p => S.equals(p.playerId)(pot.playerId))
+        (S.concat(pots1.return)(pots2.return)),
+    }
+  })
 
 //    calculatePots :: [Bet] -> Pots
 const calculatePots = def("calculatePots")({})([$.Array(Bet), Pots])
@@ -82,133 +77,149 @@ const calculatePots = def("calculatePots")({})([$.Array(Bet), Pots])
         ([{bets: [], m: 0, amount: 0}])
         (bets))))
 
-const bet = bet => state => {
-  const {bets, players} = state
+//    bet :: Bet -> Game -> Game
+const bet = def("bet")({})([Bet, Game, Game])
+  (bet => state => {
+    const {table, round} = state
+    const {bets, players} = round
 
-  const updatedPlayers = S.map(p => {
-    if (p.playerId === bet.playerId) {
-      return {...p, stack: p.stack - bet.amount}
-    }
-
-    return p
-  })(players)
-
-  const updatedBets = S.reduce
-    (acc => bet => {
-      if (S.filter(b => b.playerId === bet.playerId)(acc).length > 0) {
-        return S.map(b => {
-          if (b.playerId === bet.playerId) {
-            return {
-              ...b,
-              amount: b.amount + bet.amount,
-            }
-          }
-
-          return b
-        })(acc)
+    const updatedPlayers = S.map(p => {
+      if (p.id === bet.playerId) {
+        return {...p, stack: p.stack - bet.amount}
       }
 
-      return S.append(bet)(acc)
-    })
-    ([])
-    (S.append(bet)(bets))
+      return p
+    })(table.players)
 
-  const updateWhoActed = bets => ({whoActed = []}) => {
-    const reversedBets = [...bets].reverse()
-    const b = bets.find(p => p.playerId === bet.playerId)
-    const i = reversedBets.findIndex(p => p.playerId === bet.playerId)
+    const updatedBets = S.reduce
+      (acc => bet => {
+        if (S.filter(b => b.playerId === bet.playerId)(acc).length > 0) {
+          return S.map(b => {
+            if (b.playerId === bet.playerId) {
+              return {
+                ...b,
+                amount: b.amount + bet.amount,
+              }
+            }
 
-    if (b.amount > reversedBets[(i + 1) % bets.length].amount) {
-      return [bet.playerId]
-    } else {
-      return whoActed.concat(bet.playerId).reduce((acc, id) => {
-        if (acc.indexOf(id) > -1) {return acc}
-        return acc.concat(id)
-      }, [])
+            return b
+          })(acc)
+        }
+
+        return S.append(bet)(acc)
+      })
+      ([])
+      (S.append(bet)(bets))
+
+    const updateWhoActed = bets => ({whoActed = []}) => {
+      const reversedBets = S.reverse(bets)
+      const b = bets.find(b => b.playerId === bet.playerId)
+      const i = reversedBets.findIndex(b => b.playerId === bet.playerId)
+
+      if (b.amount > reversedBets[(i + 1) % bets.length].amount) {
+        return [bet.playerId]
+      } else {
+        return S.reduce(acc => id => {
+          if (acc.indexOf(id) > -1) {return acc}
+          return S.append(id)(acc)
+        })([])(S.append(bet.playerId)(whoActed))
+      }
     }
-  }
-  const whoActed = updateWhoActed(updatedBets)(state)
-  const nextPlayer = (
-    players.findIndex(p => p.playerId === whoActed[whoActed.length - 1]) + 1) % players.length
 
-  const balanced =  updatedBets.length >= players.length
-    && updatedBets.every((bet, _, bets) => bet.amount === bets[0].amount)
+    const whoActed = updateWhoActed(updatedBets)(round)
+    const nextPlayer = (
+      players.findIndex(id => id === whoActed[whoActed.length - 1]) + 1) % players.length
 
-  const everyoneActed = whoActed.length === players.length
-  const everyoneAllIn =
-    S.filter(p => p.stack === 0)(updatedPlayers).length === updatedPlayers.length
+    const balanced =  updatedBets.length >= players.length
+      && updatedBets.every((bet, _, bets) => bet.amount === bets[0].amount)
 
-  const someAllIn = S.filter(p => p.stack === 0)(updatedPlayers).length > 0
+    const everyoneActed = whoActed.length === players.length
+    const everyoneAllIn =
+      S.filter(p => p.stack === 0)(updatedPlayers).length === updatedPlayers.length
 
-  const playersNotAllIn = S.filter(p => p.stack !== 0)(updatedPlayers)
+    const someAllIn = S.filter(p => p.stack === 0)(updatedPlayers).length > 0
 
-  const betsNotAllIn = S.filter
-    (b => S.map(p => p.playerId)(playersNotAllIn).indexOf(b.playerId) > -1)(updatedBets)
+    const playersNotAllIn = S.filter(p => p.stack !== 0)(updatedPlayers)
 
-  const balancedAndSomeAllIn = someAllIn && betsNotAllIn.length > 1 &&
-    betsNotAllIn.every((bet, _, bets) => bet.amount === bets[0].amount)
+    const betsNotAllIn = S.filter
+      (b => S.map(p => p.id)(playersNotAllIn).indexOf(b.playerId) > -1)(updatedBets)
 
-  if (everyoneAllIn || balancedAndSomeAllIn) {
-    const result = {
+    const balancedAndSomeAllIn = someAllIn && betsNotAllIn.length > 1 &&
+      betsNotAllIn.every((bet, _, bets) => bet.amount === bets[0].amount)
+
+    const updatedTable = {
+      ...table,
       players: updatedPlayers,
-      bets: [],
-      pots: combinePots(state.pots)(calculatePots(updatedBets)),
     }
 
-    return {
-      ...state,
-      ...result,
+    if (everyoneAllIn || balancedAndSomeAllIn) {
+      const updatedRound = {
+        ...round,
+        bets: [],
+        pots: combinePots(round.pots)(calculatePots(updatedBets)),
+        nextPlayer,
+        whoActed,
+      }
+
+      return {
+        table: updatedTable,
+        round: updatedRound,
+      }
+    }
+
+    const updatedRound = {
+      ...round,
+      bets: everyoneActed && balanced? [] : updatedBets,
+      pots: everyoneActed && balanced?
+        combinePots(round.pots)(calculatePots(updatedBets)) : round.pots,
       nextPlayer,
       whoActed,
     }
-  }
 
-  const result = {
-    players: updatedPlayers,
-    bets: everyoneActed && balanced? [] : updatedBets,
-    pots: everyoneActed && balanced?
-      combinePots(state.pots)(calculatePots(updatedBets)) : (state.pots || {}),
-  }
+    return {
+      table: updatedTable,
+      round: updatedRound,
+    }
+  })
 
-  return {
-    ...state,
-    ...result,
-    nextPlayer,
-    whoActed,
-  }
-}
+//    updateStack :: [Bet] -> Player -> Player
+const updateStack = def("updateStack")({})([$.Array(Bet), Player, Player])
+  (bets => player =>
+    S.maybe
+      (player)
+      (bet => ({...player, stack: player.stack - bet.amount}))
+      (S.find(bet => bet.playerId === player.id)(bets))
+  )
 
-const updateStack = bets => player => {
-  const bet = bets.find(bet => bet.playerId === player.playerId)
 
-  if (!bet) {return player}
+//    postBlinds :: Game -> Game
+const postBlinds = def("postBlinds")({})([Game, Game])
+  (({table, round}) => {
+    const {players} = table
+    const {blinds, button} = round
+    const getPlayersOnBlinds = players.length === 2?
+      (_, i) => i === button || i === (button + 1) % players.length :
+      (_, i) => i === (button + 1) % players.length || i === (button + 2) % players.length
 
-  return {
-    ...player,
-    stack: player.stack - bet.amount,
-  }
-}
+    const bets = players
+      .filter(getPlayersOnBlinds)
+      .map((p, i) => ({playerId: p.id, amount: [Pair.fst(blinds), Pair.snd(blinds)][i]}))
 
-const postBlinds = state => {
-  const {blinds, players, button} = state
-  const getPlayersOnBlinds = players.length === 2?
-    (_, i) => i === button || i === (button + 1) % players.length :
-    (_, i) => i === (button + 1) % players.length || i === (button + 2) % players.length
+    const updatedTable = {
+      ...table,
+      players: S.map(updateStack(bets))(players),
+    }
 
-  const bets = players
-    .filter(getPlayersOnBlinds)
-    .map((p, i) => ({playerId: p.playerId, amount: blinds[i]}))
+    const updatedRound = {
+      ...round,
+      bets,
+    }
 
-  const result = {
-    bets,
-    players: players.map(updateStack(bets)),
-  }
-
-  return {
-    ...state,
-    ...result,
-  }
-}
+    return {
+      table: updatedTable,
+      round: updatedRound,
+    }
+  })
 
 module.exports = {calculatePots, postBlinds, bet}
 
