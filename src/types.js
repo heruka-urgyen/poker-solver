@@ -51,18 +51,6 @@ const Table = $.NamedRecordType("Table")("")([])
     id: $.PositiveInteger,
     maxPlayers: $.PositiveInteger,
     players: $.Array(Player),
-    button: $.Integer,
-  })
-
-//    Round :: Type
-const Round = $.NamedRecordType("Round")("")([])
-  ({
-    id: $.PositiveInteger,
-    table: Table,
-    deck: Cards,
-    communityCards: Cards,
-    cards: $.Array($.Pair($.String)(Cards)),
-    winners: $.Array($.Object),
   })
 
 //    Street :: Type
@@ -90,6 +78,30 @@ const Pots = $.NamedRecordType("Pots")("")([])
     return: $.Array(Bet),
   })
 
+//    Round :: Type
+const Round = $.NamedRecordType("Round")("")([])
+  ({
+    id: $.PositiveInteger,
+    tableId: Table.types.id,
+    deck: Cards,
+    communityCards: Cards,
+    cards: $.Array($.Pair($.String)(Cards)),
+    blinds: $.Pair($.PositiveInteger)($.PositiveInteger),
+    bets: $.Array(Bet),
+    pots: Pots,
+    button: $.NonNegativeInteger,
+    players: $.Array(Player.types.id),
+    winners: $.Array($.Object),
+  })
+
+
+//    Game :: Type
+const Game = $.NamedRecordType("Game")("")([])
+  ({
+    table: Table,
+    round: Round,
+  })
+
 module.exports = {
   def,
   CARD_RANKS,
@@ -105,4 +117,5 @@ module.exports = {
   STREETS,
   Bet,
   Pots,
+  Game,
 }

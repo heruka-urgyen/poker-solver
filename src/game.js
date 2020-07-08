@@ -13,8 +13,9 @@ const {
   Round,
   Street,
   STREETS,
+  Game,
 } = require("./types")
-const {newCard} = require("./card")
+const {newCard, newDeck} = require("./card")
 const {selectWinningHands} = require("./hand")
 
 //    newTable :: Int -> Int -> Table
@@ -23,7 +24,6 @@ const newTable = def("newTable")({})([$.PositiveInteger, $.PositiveInteger, Tabl
     id,
     maxPlayers,
     players: [],
-    button: 0,
   }))
 
 //    sitPlayer :: Table -> Player -> Table
@@ -31,9 +31,7 @@ const sitPlayer = def("sitPlayer")({})([Table, Player, Table])
   (table => player => ({
     ...table,
     ...(t => p => {
-      const beforeButton = t.players.slice(0, t.button + 1)
-      const afterButton = t.players.slice( t.button + 1)
-      const newPlayers = [...beforeButton, p, ...afterButton]
+      const newPlayers = S.append(p)(t.players)
 
       if (newPlayers.length > t.maxPlayers) {
         return {players: t.players}
@@ -43,30 +41,52 @@ const sitPlayer = def("sitPlayer")({})([Table, Player, Table])
     })(table)(player),
   }))
 
-//    newRound :: Int -> Table -> [Pair Player.id [Card]] -> [Card] -> Round
-const newRound = def
-  ("newRound")
-  ({})
-  ([$.PositiveInteger, Table, $.Array($.Pair(Player.types.id)(Cards)), Cards, Round])
-  (id => table => cards => deck => ({
+//    Blinds = Pair Positive Int, Positive Int
+//    Hole Cards = [Pair Player.id [Card]]
+//    newRoundExtended :: Int -> Table -> Int -> Blinds -> Hole Cards -> [Card] -> Round
+const newRoundExtended = def("newRoundExtended")({})
+  ([
+    Round.types.id,
+    Table,
+    Round.types.button,
+    Round.types.blinds,
+    $.Array($.Pair(Player.types.id)(Cards)),
+    Cards,
+    Round,
+  ])
+  (id => table => button => blinds => cards => deck => ({
     id,
-    table: {
-      ...table,
-      button: (table.button + 1) % table.players.length,
-    },
+    tableId: table.id,
     deck: S.filter(c => !S.elem(c)(S.chain(S.extract)(cards)))(deck),
     communityCards: [],
     cards: S.map
       (p => S.fromMaybe(S.Pair(p.id)([]))(S.find(c => Pair.fst(c) === p.id)(cards)))
       (table.players),
+    button,
+    blinds,
+    bets: [],
+    pots: {pots: [], return: []},
+    players: S.map(p => p.id)(table.players),
     winners: [],
   }))
+
+//    Blinds = Pair Positive Int, Positive Int
+//    newRound :: Int -> Table -> Int -> Blinds -> Round
+const newRound = def("newRound")({})
+  ([
+    Round.types.id,
+    Table,
+    Round.types.button,
+    Round.types.blinds,
+    Round,
+  ])
+  (a => b => c => d => newRoundExtended(a)(b)(c)(d)([])(newDeck("shuffle")))
 
 //    deal :: Street -> Round -> Round
 const deal = def("deal")({})([Street, Round, Round])
   (street => round => {
     if (street === STREETS[0]) {
-      const {players, button} = round.table
+      const {players, button} = round
       const {deck} = round
 
       const cards = S.map
@@ -123,19 +143,23 @@ const playRound = def("playRound")({})([Round, Round])
     return computeRoundWinners(r4)
   })
 
-const newGame = state => {
-  let _state = state
+//    newGame :: Game -> Game
+const newGame = def("newGame")({})([Game, $.AnyFunction])
+  (game => {
+    let _state = game
 
-  return f => {
-    const res = f(_state)
-    _state = res
-    return res
-  }
-}
+    return f => {
+      const newState = f(_state)
+      _state = newState
+
+      return _state
+    }
+  })
 
 module.exports = {
   newTable,
   sitPlayer,
+  newRoundExtended,
   newRound,
   deal,
   computeRoundWinners,
