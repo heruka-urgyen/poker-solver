@@ -1,6 +1,7 @@
 const test = require("ava")
 
-const {calculatePots, newRound, postBlinds, bet} = require("../src/bet")
+const {calculatePots, postBlinds, bet} = require("../src/bet")
+const {runGame} = require("../src/game")
 
 const twoPlayers = [{playerId: "1", stack: 50}, {playerId: "2", stack: 30}]
 const threePlayers = [
@@ -87,8 +88,8 @@ test("2-player: call - call", t => {
   }
 
 
-  newRound(initialState)(update => {
-    const [r1, r2] = update(
+  runGame(initialState)(update => {
+    const [[r1], [r2]] = update(
       bet({playerId: "1", amount: 0}),
       bet({playerId: "2", amount: 0}),
     )
@@ -121,8 +122,8 @@ test("2-player: call - check", t => {
   }
 
 
-  newRound(initialState)(update => {
-    const [_, r1, r2] = update(
+  runGame(initialState)(update => {
+    const [_, [r1], [r2]] = update(
       postBlinds,
       bet({playerId: "1", amount: 1}),
       bet({playerId: "2", amount: 0}),
@@ -164,8 +165,8 @@ test("3-player: all in - all in - all in", t => {
       return: [{playerId: "3", amount: 20}],
     },}
 
-  newRound(initialState)(update => {
-    const [_, r1, r2, r3] = update(
+  runGame(initialState)(update => {
+    const [_, [r1], [r2], [r3]] = update(
       postBlinds,
       bet({playerId: "1", amount: 49}),
       bet({playerId: "2", amount: 28}),
@@ -250,8 +251,8 @@ test("4-player: bet - all in - bet - call - call", t => {
       return: [],
     },}
 
-  newRound(initialState)(update => {
-    const [_, r1, r2, r3, r4, r5] = update(
+  runGame(initialState)(update => {
+    const [_, [r1], [r2], [r3], [r4], [r5]] = update(
       postBlinds,
       bet({playerId: "1", amount: 10}),
       bet({playerId: "2", amount: 30}),

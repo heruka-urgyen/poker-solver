@@ -112,7 +112,6 @@ const computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
     winners: selectWinningHands(S.map(S.map(S.concat(round.communityCards)))(round.cards))
   }))
 
-
 //    playRound :: Round -> Round
 const playRound = def("playRound")({})([Round, Round])
   (r => {
@@ -124,6 +123,21 @@ const playRound = def("playRound")({})([Round, Round])
     return computeRoundWinners(r4)
   })
 
+const runGame = state => {
+  const recur = (fs, s, res) => {
+    if (fs.length === 0) {
+      return res
+    }
+
+    const f = fs[0]
+    const {state, result} = f(s)
+
+    return recur(fs.slice(1), state, S.concat(res)([[result, state]]))
+  }
+
+  return update => update((...fs) => recur(fs, state, []))
+}
+
 module.exports = {
   newTable,
   sitPlayer,
@@ -131,4 +145,5 @@ module.exports = {
   deal,
   computeRoundWinners,
   playRound,
+  runGame,
 }

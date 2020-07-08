@@ -216,23 +216,5 @@ const postBlinds = state => {
   }
 }
 
-const newRound = initialState => {
-  const state = {
-    ...initialState,
-  }
-
-  const recur = (fs, s, res) => {
-    if (fs.length === 0) {return res}
-
-    const f = fs[0]
-    const {state, result} = f(s)
-
-    return recur(fs.slice(1), state, res.concat(result))
-  }
-
-
-  return update => update((...fs) => recur(fs, state, []))
-}
-
-module.exports = {calculatePots, newRound, postBlinds, bet}
+module.exports = {calculatePots, postBlinds, bet}
 

@@ -9,6 +9,7 @@ const {
   deal,
   computeRoundWinners,
   playRound,
+  runGame,
 } = require("./src/game")
 
 module.exports = {
@@ -30,4 +31,5 @@ module.exports = {
   playRound,
   bet,
   calculatePots,
+  runGame,
 }
