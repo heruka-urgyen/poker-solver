@@ -253,87 +253,67 @@ test("deal river", t => {
 })
 
 test("computeRoundWinners", t => {
+  const result = computeRoundWinners({
+    id: 1,
+    tableId: 1,
+    deck: deck.slice(11),
+    communityCards: [
+      {rank: "3", suit: "h", value: 2},
+      {rank: "3", suit: "s", value: 2},
+      {rank: "4", suit: "c", value: 3},
+      {rank: "4", suit: "d", value: 3},
+      {rank: "4", suit: "h", value: 3},
+    ],
+    cards: [
+      Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
+      Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
+      Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
+    ],
+    button: 0,
+    blinds: Pair(1)(2),
+    bets: [],
+    pots: {pots: [], return: []},
+    players: ["1", "2", "3"],
+    winners: [],
+  })
+
   t.deepEqual(
-    computeRoundWinners({
-      id: 1,
-      tableId: 1,
-      deck: deck.slice(11),
-      communityCards: [
-        {rank: "3", suit: "h", value: 2},
-        {rank: "3", suit: "s", value: 2},
-        {rank: "4", suit: "c", value: 3},
-        {rank: "4", suit: "d", value: 3},
-        {rank: "4", suit: "h", value: 3},
-      ],
-      cards: [
-        Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
-        Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
-        Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
-      ],
-      button: 0,
-      blinds: Pair(1)(2),
-      bets: [],
-      pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
-      winners: [],
-    }),
-    {
-      id: 1,
-      tableId: 1,
-      deck: deck.slice(11),
-      communityCards: [
-        {rank: "3", suit: "h", value: 2},
-        {rank: "3", suit: "s", value: 2},
-        {rank: "4", suit: "c", value: 3},
-        {rank: "4", suit: "d", value: 3},
-        {rank: "4", suit: "h", value: 3},
-      ],
-      cards: [
-        Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
-        Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
-        Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
-      ],
-      button: 0,
-      blinds: Pair(1)(2),
-      bets: [],
-      pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
-      winners: [
-        {
-          playerId: "1",
-          rank: "Full House",
-          cards: [
-            {rank: "4", suit: "c", value: 3},
-            {rank: "4", suit: "d", value: 3},
-            {rank: "4", suit: "h", value: 3},
-            {rank: "3", suit: "h", value: 2},
-            {rank: "3", suit: "s", value: 2},
-          ]
-        },
-        {
-          playerId: "2",
-          rank: "Full House",
-          cards: [
-            {rank: "4", suit: "c", value: 3},
-            {rank: "4", suit: "d", value: 3},
-            {rank: "4", suit: "h", value: 3},
-            {rank: "3", suit: "h", value: 2},
-            {rank: "3", suit: "s", value: 2},
-          ]
-        },
-        {
-          playerId: "3",
-          rank: "Full House",
-          cards: [
-            {rank: "4", suit: "c", value: 3},
-            {rank: "4", suit: "d", value: 3},
-            {rank: "4", suit: "h", value: 3},
-            {rank: "3", suit: "h", value: 2},
-            {rank: "3", suit: "s", value: 2},
-          ]
-        },
-      ],
-    }
+    result.winners,
+    [
+      {
+        playerId: "1",
+        rank: "Full House",
+        cards: [
+          {rank: "4", suit: "c", value: 3},
+          {rank: "4", suit: "d", value: 3},
+          {rank: "4", suit: "h", value: 3},
+          {rank: "3", suit: "h", value: 2},
+          {rank: "3", suit: "s", value: 2},
+        ],
+      },
+      {
+        playerId: "2",
+        rank: "Full House",
+        cards: [
+          {rank: "4", suit: "c", value: 3},
+          {rank: "4", suit: "d", value: 3},
+          {rank: "4", suit: "h", value: 3},
+          {rank: "3", suit: "h", value: 2},
+          {rank: "3", suit: "s", value: 2},
+        ],
+      },
+      {
+        playerId: "3",
+        rank: "Full House",
+        cards: [
+          {rank: "4", suit: "c", value: 3},
+          {rank: "4", suit: "d", value: 3},
+          {rank: "4", suit: "h", value: 3},
+          {rank: "3", suit: "h", value: 2},
+          {rank: "3", suit: "s", value: 2},
+        ],
+      },
+    ]
   )
 })
 
@@ -346,6 +326,13 @@ test("end round", t => {
 
   const round = {
     ...newRound(1)(table)(0)(Pair(1)(2)),
+    cards: [
+      Pair("1")([newCard("Ah"), newCard("Kd")]),
+      Pair("2")([newCard("Ac"), newCard("Ad")]),
+      Pair("3")([newCard("3h"), newCard("4d")]),
+    ],
+    communityCards:
+      [newCard("As"), newCard("Qc"), newCard("Ts"), newCard("3d"), newCard("9h")],
     bets: [],
     pots: {
       pots: [

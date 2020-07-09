@@ -130,10 +130,33 @@ const deal = def("deal")({})([Street, Round, Round])
 
 //    computeRoundWinners :: Round -> Round
 const computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
-  (round => ({
-    ...round,
-    winners: selectWinningHands(S.map(S.map(S.concat(round.communityCards)))(round.cards))
-  }))
+  (round => {
+
+    if (round.pots.pots.length === 0) {
+      return {
+        ...round,
+        winners: selectWinningHands(S.map(S.map(S.concat(round.communityCards)))(round.cards))
+      }
+    }
+
+    const winners = S.chain
+      (([pot, cards]) => {
+        const winners =
+          selectWinningHands(S.map(S.map(S.concat(round.communityCards)))(cards))
+
+        return S.map
+          (h => ({...h, amount: pot.amount / winners.length}))
+          (winners)
+      })
+      (S.map
+        (p => [p, S.map(id => round.cards.find(c => Pair.fst(c) === id))(p.players)])
+        (round.pots.pots))
+
+    return {
+      ...round,
+      winners,
+    }
+  })
 
 //    endRound :: Game -> Game
 const endRound = def("endRound")({})([Game, Game])
