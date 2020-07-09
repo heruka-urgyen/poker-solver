@@ -11,6 +11,7 @@ const {
   deal,
   computeRoundWinners,
   playRound,
+  endRound,
   newGame,
 } = require ("../src/game")
 const {STREETS} = require("../src/types")
@@ -336,13 +337,73 @@ test("computeRoundWinners", t => {
   )
 })
 
+test("end round", t => {
+  const table = {
+    id: 1,
+    players: [{id: "1", stack: 0}, {id: "2", stack: 0}, {id: "3", stack: 0}],
+    maxPlayers: 3,
+  }
+
+  const round = {
+    ...newRound(1)(table)(0)(Pair(1)(2)),
+    bets: [],
+    pots: {
+      pots: [
+        {players: ["1", "2", "3"], amount: 90},
+        {players: ["1", "3"], amount: 40},
+      ],
+      return: [{playerId: "3", amount: 20}],
+    },
+    winners: [{playerId: "1"}],
+  }
+
+  const game1 = {
+    table,
+    round,
+  }
+
+  const game2 = {
+    table,
+    round: {
+      ...round,
+      winners: [{playerId: "1"}, {playerId: "3"}],
+    },
+  }
+
+  const game3 = {
+    table,
+    round: {
+      ...round,
+      winners: [{playerId: "2"}],
+    },
+  }
+
+  const [r1, r2, r3] = S.map(endRound)([game1, game2, game3])
+
+  t.deepEqual(
+    r1.table.players,
+    [{id: "1", stack: 130}, {id: "2", stack: 0}, {id: "3", stack: 20}],
+  )
+
+  t.deepEqual(
+    r2.table.players,
+    [{id: "1", stack: 65}, {id: "2", stack: 0}, {id: "3", stack: 85}],
+  )
+
+  // t.deepEqual(
+  //   r3.table.players,
+  //   [{id: "1", stack: 40}, {id: "2", stack: 90}, {id: "3", stack: 20}],
+  // )
+
+})
+
 test("play round", t => {
   const table =
     sitPlayer(sitPlayer(newTable(1)(2))({id: "1", stack: 100}))({id: "2", stack: 100})
   const round = newRound(1)(table)(0)(Pair(1)(2))
 
   const run = newGame({table, round})
-  const [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14] = [
+  const [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16] = [
     postBlinds,
     s => ({...s, round: deal(STREETS[0])(s.round)}),
     bet({playerId: "1", amount: 1}),
@@ -357,6 +418,8 @@ test("play round", t => {
     bet({playerId: "1", amount: 88}),
     bet({playerId: "2", amount: 88}),
     s => ({...s, round: computeRoundWinners(s.round)}),
+    endRound,
+    s => ({...s, round: newRound(2)(table)(1)(Pair(1)(2))}),
   ].map(run)
 
   t.deepEqual(
@@ -429,8 +492,20 @@ test("play round", t => {
     {pots: [{amount: 200, players: ["1", "2"]}], return: []},
   )
 
-  t.true(
-    r14.round.winners.length > 0
+  t.true(r14.round.winners.length > 0)
+
+  t.regex(
+    S.map(p => p.stack)(r15.table.players).toString(),
+    /100,100|200,0|0,200/,
   )
 
+  t.deepEqual(
+    r16.table,
+    r15.table
+  )
+
+  t.deepEqual(
+    r16.round,
+    newRoundExtended(2)(r16.table)(1)(Pair(1)(2))(r16.round.cards)(r16.round.deck)
+  )
 })

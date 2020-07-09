@@ -135,6 +135,54 @@ const computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
     winners: selectWinningHands(S.map(S.map(S.concat(round.communityCards)))(round.cards))
   }))
 
+//    endRound :: Game -> Game
+const endRound = def("endRound")({})([Game, Game])
+  (({table, round}) => {
+    const {winners} = round
+    return {
+      table: {
+        ...table,
+        players: S.map
+          (p => {
+            const returnAmount = S.fromMaybe
+              (0)
+              (S.get
+                (S.is($.Number))
+                ("amount")
+                (round.pots.return[0]))
+
+            const isReturnPlayer = S.maybe
+              (false)
+              (id => id === p.id)
+              (S.get
+                (S.is($.String))
+                ("playerId")
+                (round.pots.return[0]))
+
+            if (S.isJust(S.find(w => w.playerId === p.id)(winners))) {
+              return {
+                ...p,
+                stack: p.stack +
+                  (isReturnPlayer? returnAmount : 0) +
+                  (S.reduce
+                    (acc => p => acc + p.amount)
+                    (0)
+                    (S.filter(({players}) => players.indexOf(p.id) > -1)(round.pots.pots)) /
+                  winners.length),
+              }
+            }
+
+            return {
+              ...p,
+              stack: p.stack + (isReturnPlayer? returnAmount : 0),
+            }
+          })
+          (table.players)
+      },
+      round,
+    }
+  })
+
 //    playRound :: Round -> Round
 const playRound = def("playRound")({})([Round, Round])
   (r => {
@@ -167,5 +215,6 @@ module.exports = {
   deal,
   computeRoundWinners,
   playRound,
+  endRound,
   newGame,
 }
