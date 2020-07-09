@@ -221,5 +221,58 @@ const postBlinds = def("postBlinds")({})([Game, Game])
     }
   })
 
-module.exports = {calculatePots, postBlinds, bet}
+//    fold :: Player.id -> Game -> Game
+const fold = def("fold")({})([Player.types.id, Game, Game])
+  (id => ({table, round}) => {
+    const {players} = table
+    const pot = S.reduce(acc => bet => acc + bet.amount)(0)(round.bets)
+
+    if (players.length === 2) {
+      return {
+        table,
+        round: {
+          ...round,
+          bets: [],
+          pots: {
+            pots: [{players: round.players, amount: pot}],
+            return: [],
+          },
+          winners: S.map(id => ({playerId: id}))(S.filter(pid => pid !== id)(round.players)),
+        },
+      }
+    } else {
+      const bet = round.bets.find(b => b.playerId === id)
+      const roundPlayers = S.filter(pid => pid !== id)(round.players)
+
+      if (roundPlayers.length === round.whoActed.length) {
+        return {
+          table,
+          round: {
+            ...round,
+            players: roundPlayers,
+            bets: [],
+            pots: {
+              pots: [{players: roundPlayers, amount: pot}],
+              return: [],
+            },
+          },
+        }
+      }
+
+      return {
+        table,
+        round: {
+          ...round,
+          players: roundPlayers,
+          bets: round.bets.filter(b => b.playerId !== id),
+          pots: {
+            pots: [{players: roundPlayers, amount: bet.amount}],
+            return: [],
+          },
+        },
+      }
+    }
+  })
+
+module.exports = {calculatePots, postBlinds, bet, fold}
 

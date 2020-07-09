@@ -1,7 +1,7 @@
 const {showCard, newCard, newDeck} = require("./src/card")
 const {solveHand, compareHands, selectWinningHands} = require("./src/hand")
 const {CARD_RANKS, CARD_SUITS, HAND_RANKS, STREETS} = require("./src/types")
-const {bet, calculatePots} = require("./src/bet")
+const {bet, fold, calculatePots} = require("./src/bet")
 const {
   newTable,
   sitPlayer,
@@ -9,7 +9,7 @@ const {
   deal,
   computeRoundWinners,
   playRound,
-  runGame,
+  newGame,
 } = require("./src/game")
 
 module.exports = {
@@ -31,5 +31,6 @@ module.exports = {
   playRound,
   bet,
   calculatePots,
-  runGame,
+  fold,
+  newGame,
 }

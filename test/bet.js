@@ -1,7 +1,7 @@
 const test = require("ava")
 const Pair = require("sanctuary-pair")
 
-const {calculatePots, postBlinds, bet} = require("../src/bet")
+const {calculatePots, postBlinds, bet, fold} = require("../src/bet")
 const {newGame, newRound} = require("../src/game")
 const {newDeck} = require("../src/card")
 
@@ -23,6 +23,180 @@ const table3 = {
     {id: "2", stack: 30},
     {id: "3", stack: 70},
     {id: "4", stack: 65}],}
+
+test("2-player: bet - fold", t => {
+  const initialState = {
+    table: table1,
+    round: newRound(1)(table1)(0)(Pair(1)(2)),
+  }
+
+  const res1 = {
+    players: [{id: "1", stack: 39}, {id: "2", stack: 28}],
+    bets: [{playerId: "1", amount: 11}, {playerId: "2", amount: 2}],
+    pots: {pots: [], return: []},
+  }
+
+  const res2 = {
+    players: [{id: "1", stack: 39}, {id: "2", stack: 28}],
+    bets: [],
+    pots: {
+      pots: [{amount: 13, players: ["1", "2"]}],
+      return: [],
+    },
+  }
+
+  const run = newGame(initialState)
+  const [_, r1, r2] = [
+    postBlinds,
+    bet({playerId: "1", amount: 10}),
+    fold("2"),
+  ].map(run).map(({table: {players}, round: {bets, pots}}) => ({players, bets, pots}))
+
+  t.deepEqual(r1, res1)
+  t.deepEqual(r2, res2)
+})
+
+test("2-player: call - check - bet - fold", t => {
+  const initialState = {
+    table: table1,
+    round: newRound(1)(table1)(0)(Pair(1)(2)),
+  }
+
+  const res1 = {
+    players: [{id: "1", stack: 48}, {id: "2", stack: 28}],
+    bets: [{playerId: "1", amount: 2}, {playerId: "2", amount: 2}],
+    pots: {pots: [], return: []},
+  }
+
+  const res2 = {
+    players: [{id: "1", stack: 48}, {id: "2", stack: 28}],
+    bets: [],
+    pots: {
+      pots: [{amount: 4, players: ["1", "2"]}],
+      return: [],
+    },
+  }
+  const res3 = {
+    players: [{id: "1", stack: 38}, {id: "2", stack: 28}],
+    bets: [{playerId: "1", amount: 10}],
+    pots: {
+      pots: [{amount: 4, players: ["1", "2"]}],
+      return: [],
+    },
+  }
+
+  const res4 = {
+    players: [{id: "1", stack: 38}, {id: "2", stack: 28}],
+    bets: [],
+    pots: {
+      pots: [{amount: 14, players: ["1", "2"]}],
+      return: [],
+    },
+  }
+
+  const run = newGame(initialState)
+  const [_, r1, r2, r3, r4] = [
+    postBlinds,
+    bet({playerId: "1", amount: 1}),
+    bet({playerId: "2", amount: 0}),
+    bet({playerId: "1", amount: 10}),
+    fold("2"),
+  ].map(run).map(({table: {players}, round: {bets, pots}}) => ({players, bets, pots}))
+
+  t.deepEqual(r1, res1)
+  t.deepEqual(r2, res2)
+  t.deepEqual(r3, res3)
+})
+
+test("3-player: bet - fold - call", t => {
+  const initialState = {
+    table: table2,
+    round: newRound(1)(table2)(2)(Pair(1)(2)),
+  }
+
+  const res1 = {
+    players: [{id: "1", stack: 49}, {id: "2", stack: 28}, {id: "3", stack: 60}],
+    bets:
+      [{playerId: "1", amount: 1}, {playerId: "2", amount: 2}, {playerId: "3", amount: 10}],
+    pots: {pots: [], return: []},
+  }
+
+  const res2 = {
+    players: [{id: "1", stack: 49}, {id: "2", stack: 28}, {id: "3", stack: 60}],
+    bets:
+      [{playerId: "2", amount: 2}, {playerId: "3", amount: 10}],
+    pots: {
+      pots: [{amount: 1, players: ["2", "3"]}],
+      return: [],
+    },
+  }
+
+  const res3 = {
+    players: [{id: "1", stack: 49}, {id: "2", stack: 20}, {id: "3", stack: 60}],
+    bets: [],
+    pots: {
+      pots: [{amount: 21, players: ["2", "3"]}],
+      return: [],
+    },
+  }
+
+  const run = newGame(initialState)
+  const [_, r1, r2, r3] = [
+    postBlinds,
+    bet({playerId: "3", amount: 10}),
+    fold("1"),
+    bet({playerId: "2", amount: 8}),
+  ].map(run).map(({table: {players}, round: {bets, pots}}) => ({players, bets, pots}))
+
+  t.deepEqual(r1, res1)
+  t.deepEqual(r2, res2)
+  t.deepEqual(r3, res3)
+})
+
+test("3-player: bet - call - fold", t => {
+  const initialState = {
+    table: table2,
+    round: newRound(1)(table2)(2)(Pair(1)(2)),
+  }
+
+  const res1 = {
+    players: [{id: "1", stack: 49}, {id: "2", stack: 28}, {id: "3", stack: 60}],
+    bets:
+      [{playerId: "1", amount: 1}, {playerId: "2", amount: 2}, {playerId: "3", amount: 10}],
+    pots: {pots: [], return: []},
+  }
+
+  const res2 = {
+    players: [{id: "1", stack: 40}, {id: "2", stack: 28}, {id: "3", stack: 60}],
+    bets:
+      [{playerId: "1", amount: 10}, {playerId: "2", amount: 2}, {playerId: "3", amount: 10}],
+    pots: {
+      pots: [],
+      return: [],
+    },
+  }
+
+  const res3 = {
+    players: [{id: "1", stack: 40}, {id: "2", stack: 28}, {id: "3", stack: 60}],
+    bets: [],
+    pots: {
+      pots: [{amount: 22, players: ["1", "3"]}],
+      return: [],
+    },
+  }
+
+  const run = newGame(initialState)
+  const [_, r1, r2, r3] = [
+    postBlinds,
+    bet({playerId: "3", amount: 10}),
+    bet({playerId: "1", amount: 9}),
+    fold("2"),
+  ].map(run).map(({table: {players}, round: {bets, pots}}) => ({players, bets, pots}))
+
+  t.deepEqual(r1, res1)
+  t.deepEqual(r2, res2)
+  t.deepEqual(r3, res3)
+})
 
 test("2-player: post blinds", t => {
   const initialState = {
