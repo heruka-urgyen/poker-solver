@@ -162,17 +162,17 @@ const computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
 const endRound = def("endRound")({})([Game, Game])
   (({table, round}) => {
     const {winners} = round
+
     return {
       table: {
         ...table,
         players: S.map
           (p => {
-            const returnAmount = S.fromMaybe
+            const maybeWinner = S.find(w => w.playerId === p.id)(winners)
+            const winAmount = S.fromMaybe
               (0)
-              (S.get
-                (S.is($.Number))
-                ("amount")
-                (round.pots.return[0]))
+              (S.chain
+                (S.get(S.is($.Number))("amount"))(maybeWinner))
 
             const isReturnPlayer = S.maybe
               (false)
@@ -182,22 +182,23 @@ const endRound = def("endRound")({})([Game, Game])
                 ("playerId")
                 (round.pots.return[0]))
 
-            if (S.isJust(S.find(w => w.playerId === p.id)(winners))) {
+            const returnAmount = isReturnPlayer? S.fromMaybe
+              (0)
+              (S.get
+                (S.is($.Number))
+                ("amount")
+                (round.pots.return[0])) : 0
+
+            if (S.isJust(maybeWinner)) {
               return {
                 ...p,
-                stack: p.stack +
-                  (isReturnPlayer? returnAmount : 0) +
-                  (S.reduce
-                    (acc => p => acc + p.amount)
-                    (0)
-                    (S.filter(({players}) => players.indexOf(p.id) > -1)(round.pots.pots)) /
-                  winners.length),
+                stack: p.stack + winAmount + returnAmount,
               }
             }
 
             return {
               ...p,
-              stack: p.stack + (isReturnPlayer? returnAmount : 0),
+              stack: p.stack + returnAmount,
             }
           })
           (table.players)

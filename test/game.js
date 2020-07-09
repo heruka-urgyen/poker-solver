@@ -341,47 +341,19 @@ test("end round", t => {
       ],
       return: [{playerId: "3", amount: 20}],
     },
-    winners: [{playerId: "1"}],
   }
 
-  const game1 = {
+  const game = {
     table,
-    round,
+    round: computeRoundWinners(round),
   }
 
-  const game2 = {
-    table,
-    round: {
-      ...round,
-      winners: [{playerId: "1"}, {playerId: "3"}],
-    },
-  }
-
-  const game3 = {
-    table,
-    round: {
-      ...round,
-      winners: [{playerId: "2"}],
-    },
-  }
-
-  const [r1, r2, r3] = S.map(endRound)([game1, game2, game3])
+  const r1 = endRound(game)
 
   t.deepEqual(
     r1.table.players,
-    [{id: "1", stack: 130}, {id: "2", stack: 0}, {id: "3", stack: 20}],
+    [{id: "1", stack: 40}, {id: "2", stack: 90}, {id: "3", stack: 20}],
   )
-
-  t.deepEqual(
-    r2.table.players,
-    [{id: "1", stack: 65}, {id: "2", stack: 0}, {id: "3", stack: 85}],
-  )
-
-  // t.deepEqual(
-  //   r3.table.players,
-  //   [{id: "1", stack: 40}, {id: "2", stack: 90}, {id: "3", stack: 20}],
-  // )
-
 })
 
 test("play round", t => {
