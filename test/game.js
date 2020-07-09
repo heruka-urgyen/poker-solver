@@ -282,6 +282,7 @@ test("computeRoundWinners", t => {
     [
       {
         playerId: "1",
+        amount: 0,
         rank: "Full House",
         cards: [
           {rank: "4", suit: "c", value: 3},
@@ -293,6 +294,7 @@ test("computeRoundWinners", t => {
       },
       {
         playerId: "2",
+        amount: 0,
         rank: "Full House",
         cards: [
           {rank: "4", suit: "c", value: 3},
@@ -304,6 +306,7 @@ test("computeRoundWinners", t => {
       },
       {
         playerId: "3",
+        amount: 0,
         rank: "Full House",
         cards: [
           {rank: "4", suit: "c", value: 3},

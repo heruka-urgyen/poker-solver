@@ -131,13 +131,10 @@ const deal = def("deal")({})([Street, Round, Round])
 //    computeRoundWinners :: Round -> Round
 const computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
   (round => {
-
-    if (round.pots.pots.length === 0) {
-      return {
-        ...round,
-        winners: selectWinningHands(S.map(S.map(S.concat(round.communityCards)))(round.cards))
-      }
-    }
+    const pots = S.reduce
+      (acc => dummyPot => acc.length > 0? acc : [dummyPot])
+      (round.pots.pots)
+      ([{amount: 0, players: round.players}])
 
     const winners = S.chain
       (([pot, cards]) => {
@@ -150,7 +147,7 @@ const computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
       })
       (S.map
         (p => [p, S.map(id => round.cards.find(c => Pair.fst(c) === id))(p.players)])
-        (round.pots.pots))
+        (pots))
 
     return {
       ...round,

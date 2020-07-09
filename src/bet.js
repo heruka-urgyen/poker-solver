@@ -237,7 +237,6 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
             pots: [{players: round.players, amount: pot}],
             return: [],
           },
-          winners: S.map(id => ({playerId: id}))(S.filter(pid => pid !== id)(round.players)),
         },
       }
     } else {

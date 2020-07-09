@@ -91,7 +91,12 @@ const Round = $.NamedRecordType("Round")("")([])
     pots: Pots,
     button: $.NonNegativeInteger,
     players: $.Array(Player.types.id),
-    winners: $.Array($.Object),
+    winners: $.Array($.RecordType({
+      playerId: Player.types.id,
+      amount: Pot.types.amount,
+      cards: Cards,
+      rank: HandRank,
+    })),
   })
 
 
