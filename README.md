@@ -18,7 +18,7 @@ deal :: Street -> Round -> Round
 To calculate equity of a hand
 
 ```
-node equity-cli.js -p <number of players> -n <number of trials> -h <hand>
+node calculate-equity.js -p <number of players> -n <number of trials> -h <hand>
 
 // input
 node equity-cli.js -p 9 -n 100 -h AcKs
