@@ -204,17 +204,6 @@ const endRound = def("endRound")({})([Game, Game])
     }
   })
 
-//    playRound :: Round -> Round
-const playRound = def("playRound")({})([Round, Round])
-  (r => {
-    const r1 = deal(STREETS[0])(r)
-    const r2 = deal(STREETS[1])(r1)
-    const r3 = deal(STREETS[2])(r2)
-    const r4 = deal(STREETS[3])(r3)
-
-    return computeRoundWinners(r4)
-  })
-
 //    newGame :: Game -> Game
 const newGame = def("newGame")({})([Game, $.AnyFunction])
   (game => {
@@ -235,7 +224,6 @@ module.exports = {
   newRound,
   deal,
   computeRoundWinners,
-  playRound,
   endRound,
   newGame,
 }

@@ -10,7 +10,6 @@ const {
   newRound,
   deal,
   computeRoundWinners,
-  playRound,
   endRound,
   newGame,
 } = require ("../src/game")
