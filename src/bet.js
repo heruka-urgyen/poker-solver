@@ -113,22 +113,25 @@ const bet = def("bet")({})([Bet, Game, Game])
       ([])
       (S.append(bet)(bets))
 
-    const updateWhoActed = bets => ({whoActed = []}) => {
+    const updateWhoActed = players => bets => ({whoActed = []}) => {
       const reversedBets = S.reverse(bets)
       const b = bets.find(b => b.playerId === bet.playerId)
       const i = reversedBets.findIndex(b => b.playerId === bet.playerId)
+      const maybeAllInPlayer = S.find(p => p.stack === 0)(players)
+      const hasAllInPlayer = S.isJust(S.find(p => p.stack === 0)(players))
+      const allInPlayer = S.maybe("")(p => p.id)(maybeAllInPlayer)
+      const removeDuplicates = xs => S.reduce
+        (acc => id => acc.indexOf(id) > -1? acc : S.append(id)(acc))([])(xs)
 
       if (b.amount > reversedBets[(i + 1) % bets.length].amount) {
-        return [bet.playerId]
+        return hasAllInPlayer? removeDuplicates([allInPlayer, bet.playerId]) : [bet.playerId]
       } else {
-        return S.reduce(acc => id => {
-          if (acc.indexOf(id) > -1) {return acc}
-          return S.append(id)(acc)
-        })([])(S.append(bet.playerId)(whoActed))
+        return removeDuplicates(S.append(bet.playerId)(whoActed))
       }
     }
 
-    const whoActed = updateWhoActed(updatedBets)(round)
+    const whoActed = updateWhoActed(updatedPlayers)(updatedBets)(round)
+
     const nextPlayer = (
       players.findIndex(id => id === whoActed[whoActed.length - 1]) + 1) % players.length
 
@@ -142,11 +145,7 @@ const bet = def("bet")({})([Bet, Game, Game])
     const betsNotAllIn = S.filter
       (b => playersNotAllIn.findIndex(p => p.id === b.playerId) > -1)(updatedBets)
 
-    const balanced = updatedBets.length >= players.length
-      && betsNotAllIn.every((bet, _, bets) => bet.amount === bets[0].amount)
-      || everyoneAllIn
-
-    const endOfStreet = balanced && (everyoneActed || someAllIn)
+    const endOfStreet = everyoneActed && (everyoneActed || someAllIn)
 
     if (endOfStreet) {
       const allIn = everyoneAllIn || someAllIn && updatedPlayers.length === 2
