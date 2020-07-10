@@ -68,6 +68,7 @@ test("newRoundExtended", t => {
         Pair("2")([{rank: "A", suit: "s", value: 13}, {rank: "K", suit: "c", value: 12}]),
         Pair("3")([])],
       button: 0,
+      nextPlayer: 0,
       blinds: Pair(1)(2),
       bets: [],
       pots: {pots: [], return: []},
