@@ -132,37 +132,56 @@ const bet = def("bet")({})([Bet, Game, Game])
     const nextPlayer = (
       players.findIndex(id => id === whoActed[whoActed.length - 1]) + 1) % players.length
 
-    const balanced =  updatedBets.length >= players.length
-      && updatedBets.every((bet, _, bets) => bet.amount === bets[0].amount)
-
-    const everyoneActed = whoActed.length === players.length
-    const everyoneAllIn =
-      S.filter(p => p.stack === 0)(updatedPlayers).length === updatedPlayers.length
-
-    const someAllIn = S.filter(p => p.stack === 0)(updatedPlayers).length > 0
-
+    const playersAllIn = S.filter(p => p.stack === 0)(updatedPlayers)
     const playersNotAllIn = S.filter(p => p.stack !== 0)(updatedPlayers)
+    const someAllIn = playersAllIn.length > 0
+    const everyoneAllIn = playersAllIn.length === players.length
+
+    const everyoneActed = whoActed.length === players.length || everyoneAllIn
 
     const betsNotAllIn = S.filter
-      (b => S.map(p => p.id)(playersNotAllIn).indexOf(b.playerId) > -1)(updatedBets)
+      (b => playersNotAllIn.findIndex(p => p.id === b.playerId) > -1)(updatedBets)
 
-    const balancedAndSomeAllIn = someAllIn &&
-      (players.length === 2? balanced :
-        betsNotAllIn.length > 1 &&
-        betsNotAllIn.every((bet, _, bets) => bet.amount === bets[0].amount))
+    const balanced = updatedBets.length >= players.length
+      && betsNotAllIn.every((bet, _, bets) => bet.amount === bets[0].amount)
+      || everyoneAllIn
 
-    const updatedTable = {
-      ...table,
-      players: updatedPlayers,
-    }
+    const endOfStreet = balanced && (everyoneActed || someAllIn)
 
-    if (everyoneAllIn || balancedAndSomeAllIn) {
-      const allIn = everyoneAllIn || someAllIn && players.length === 2
+    if (endOfStreet) {
+      const allIn = everyoneAllIn || someAllIn && updatedPlayers.length === 2
+      const pots = combinePots(round.pots)(calculatePots(updatedBets))
+      const players = S.map(p => {
+        const isReturnPlayer = S.maybe
+          (false)
+          (id => id === p.id)
+          (S.get
+            (S.is($.String))
+            ("playerId")
+            (pots.return[0]))
+
+        const returnAmount = isReturnPlayer? S.fromMaybe
+          (0)
+          (S.get
+            (S.is($.Number))
+            ("amount")
+            (pots.return[0])) : 0
+
+        return {
+          ...p,
+          stack: p.stack + returnAmount,
+        }
+      })(updatedPlayers)
+
+      const updatedTable = {...table, players}
       const updatedRound = {
         ...round,
         status: allIn? ROUND_STATUS[2] : round.status,
         bets: [],
-        pots: combinePots(round.pots)(calculatePots(updatedBets)),
+        pots: {
+          pots: pots.pots,
+          return: [],
+        },
         nextPlayer,
         whoActed: [],
         street: STREETS[STREETS.indexOf(round.street) + 1],
@@ -174,15 +193,14 @@ const bet = def("bet")({})([Bet, Game, Game])
       }
     }
 
-    const endOfStreet = everyoneActed && balanced
+    const updatedTable = {...table, players: updatedPlayers}
     const updatedRound = {
       ...round,
-      bets: endOfStreet? [] : updatedBets,
-      pots: endOfStreet?
-        combinePots(round.pots)(calculatePots(updatedBets)) : round.pots,
+      bets: updatedBets,
+      pots: round.pots,
       nextPlayer,
-      whoActed: endOfStreet? [] : whoActed,
-      street: endOfStreet? STREETS[STREETS.indexOf(round.street) + 1] : round.street,
+      whoActed: whoActed,
+      street: round.street,
     }
 
     return {

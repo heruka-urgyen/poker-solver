@@ -343,7 +343,7 @@ test("computeRoundWinners", t => {
 test("end round", t => {
   const table = {
     id: 1,
-    players: [{id: "1", stack: 0}, {id: "2", stack: 0}, {id: "3", stack: 0}],
+    players: [{id: "1", stack: 0}, {id: "2", stack: 0}, {id: "3", stack: 20}],
     maxPlayers: 3,
   }
 
@@ -362,7 +362,7 @@ test("end round", t => {
         {players: ["1", "2", "3"], amount: 90},
         {players: ["1", "3"], amount: 40},
       ],
-      return: [{playerId: "3", amount: 20}],
+      return: [],
     },
   }
 

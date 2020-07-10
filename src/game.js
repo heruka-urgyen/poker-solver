@@ -175,32 +175,14 @@ const endRound = def("endRound")({})([Game, Game])
               (S.chain
                 (S.get(S.is($.Number))("amount"))(maybeWinner))
 
-            const isReturnPlayer = S.maybe
-              (false)
-              (id => id === p.id)
-              (S.get
-                (S.is($.String))
-                ("playerId")
-                (round.pots.return[0]))
-
-            const returnAmount = isReturnPlayer? S.fromMaybe
-              (0)
-              (S.get
-                (S.is($.Number))
-                ("amount")
-                (round.pots.return[0])) : 0
-
             if (S.isJust(maybeWinner)) {
               return {
                 ...p,
-                stack: p.stack + winAmount + returnAmount,
+                stack: p.stack + winAmount,
               }
             }
 
-            return {
-              ...p,
-              stack: p.stack + returnAmount,
-            }
+            return p
           })
           (table.players)
       },

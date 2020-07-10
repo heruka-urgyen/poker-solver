@@ -310,7 +310,7 @@ test("3-player: all in - all in - all in", t => {
     pots: {pots: [], return: []},}
 
   const res3 = {
-    players: [{id: "1", stack: 0}, {id: "2", stack: 0}, {id: "3", stack: 0}],
+    players: [{id: "1", stack: 0}, {id: "2", stack: 0}, {id: "3", stack: 20}],
     status: ROUND_STATUS[2],
     bets: [],
     pots: {
@@ -318,7 +318,7 @@ test("3-player: all in - all in - all in", t => {
         {players: ["1", "2", "3"], amount: 90},
         {players: ["1", "3"], amount: 40},
       ],
-      return: [{playerId: "3", amount: 20}],
+      return: [],
     },}
 
   const run = newGame(initialState)
