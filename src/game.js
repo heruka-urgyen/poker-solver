@@ -207,6 +207,8 @@ const endRound = def("endRound")({})([Game, Game])
       round: {
         ...round,
         status: ROUND_STATUS[1],
+        communityCards: [],
+        cards: [],
       },
     }
   })
