@@ -10,6 +10,7 @@ const {
   Pots,
   Game,
   STREETS,
+  ROUND_STATUS,
 } = require("./types")
 
 //    combinePots :: Pots -> Pots -> Pots
@@ -156,6 +157,7 @@ const bet = def("bet")({})([Bet, Game, Game])
     if (everyoneAllIn || balancedAndSomeAllIn) {
       const updatedRound = {
         ...round,
+        status: everyoneAllIn? ROUND_STATUS[2] : round.status,
         bets: [],
         pots: combinePots(round.pots)(calculatePots(updatedBets)),
         nextPlayer,

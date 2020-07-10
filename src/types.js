@@ -17,7 +17,7 @@ const HAND_RANKS =  [
   "Quads",
   "Straight Flush",
 ]
-const ROUND_STATUS = ["IN_PROGRESS", "FINISHED"]
+const ROUND_STATUS = ["IN_PROGRESS", "FINISHED", "ALL_IN"]
 const STREETS = ["PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN"]
 
 //    Rank :: Type

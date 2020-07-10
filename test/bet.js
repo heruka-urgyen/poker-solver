@@ -4,6 +4,7 @@ const Pair = require("sanctuary-pair")
 const {calculatePots, postBlinds, bet, fold} = require("../src/bet")
 const {newGame, newRound} = require("../src/game")
 const {newDeck} = require("../src/card")
+const {ROUND_STATUS} = require("../src/types")
 
 const table1 = {
   id: 1,
@@ -298,16 +299,19 @@ test("3-player: all in - all in - all in", t => {
 
   const res1 = {
     players: [{id: "1", stack: 0}, {id: "2", stack: 28}, {id: "3", stack: 70}],
+    status: ROUND_STATUS[0],
     bets: [{playerId: "1", amount: 50}, {playerId: "2", amount: 2}],
     pots: {pots: [], return: []},}
 
   const res2 = {
     players: [{id: "1", stack: 0}, {id: "2", stack: 0}, {id: "3", stack: 70}],
+    status: ROUND_STATUS[0],
     bets: [{playerId: "1", amount: 50}, {playerId: "2", amount: 30}],
     pots: {pots: [], return: []},}
 
   const res3 = {
     players: [{id: "1", stack: 0}, {id: "2", stack: 0}, {id: "3", stack: 0}],
+    status: ROUND_STATUS[2],
     bets: [],
     pots: {
       pots: [
@@ -323,7 +327,8 @@ test("3-player: all in - all in - all in", t => {
     bet({playerId: "1", amount: 49}),
     bet({playerId: "2", amount: 28}),
     bet({playerId: "3", amount: 70}),
-  ].map(run).map(({table: {players}, round: {bets, pots}}) => ({players, bets, pots}))
+  ].map(run)
+    .map(({table: {players}, round: {bets, pots, status}}) => ({players, bets, pots, status}))
 
   t.deepEqual(r1, res1)
   t.deepEqual(r2, res2)
