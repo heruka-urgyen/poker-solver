@@ -9,6 +9,7 @@ const {
   newRoundExtended,
   deal,
   computeRoundWinners,
+  endRound,
   newGame,
 } = require("./src/game")
 
@@ -37,5 +38,6 @@ module.exports = {
   newRoundExtended,
   deal,
   computeRoundWinners,
+  endRound,
   newGame,
 }
