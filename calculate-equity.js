@@ -38,6 +38,8 @@ const getRound = p => i => newRoundExtended
 
 const getNewGame = p => i => newGame({table: getTable(p), round: getRound(p)(i)})
 
+const nextStreet = street => STREETS[STREETS.indexOf(street) + 1]
+
 bar1.start(n, 0)
 
 const result = S.reduce
@@ -57,11 +59,15 @@ const result = S.reduce
     (i => {
       bar1.update(i)
       const run = getNewGame(p)(i)
-      const [_1, _2, _3, _4, r] = [
-        s => ({...s, round: deal(STREETS[0])(s.round)}),
-        s => ({...s, round: deal(STREETS[1])(s.round)}),
-        s => ({...s, round: deal(STREETS[2])(s.round)}),
-        s => ({...s, round: deal(STREETS[3])(s.round)}),
+      const [_1, _2, _3, _4, _5, _6, _7, _8, r] = [
+        s => ({...s, round: deal(s.round)}),
+        s => ({...s, round: {...s.round, street: nextStreet(s.round.street)}}),
+        s => ({...s, round: deal(s.round)}),
+        s => ({...s, round: {...s.round, street: nextStreet(s.round.street)}}),
+        s => ({...s, round: deal(s.round)}),
+        s => ({...s, round: {...s.round, street: nextStreet(s.round.street)}}),
+        s => ({...s, round: deal(s.round)}),
+        s => ({...s, round: {...s.round, street: nextStreet(s.round.street)}}),
         s => ({...s, round: computeRoundWinners(s.round)}),
       ].map(run)
 

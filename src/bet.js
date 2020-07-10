@@ -9,6 +9,7 @@ const {
   Player,
   Pots,
   Game,
+  STREETS,
 } = require("./types")
 
 //    combinePots :: Pots -> Pots -> Pots
@@ -159,6 +160,7 @@ const bet = def("bet")({})([Bet, Game, Game])
         pots: combinePots(round.pots)(calculatePots(updatedBets)),
         nextPlayer,
         whoActed,
+        street: STREETS[STREETS.indexOf(round.street) + 1],
       }
 
       return {
@@ -167,13 +169,15 @@ const bet = def("bet")({})([Bet, Game, Game])
       }
     }
 
+    const endOfStreet = everyoneActed && balanced
     const updatedRound = {
       ...round,
-      bets: everyoneActed && balanced? [] : updatedBets,
-      pots: everyoneActed && balanced?
+      bets: endOfStreet? [] : updatedBets,
+      pots: endOfStreet?
         combinePots(round.pots)(calculatePots(updatedBets)) : round.pots,
       nextPlayer,
       whoActed,
+      street: endOfStreet? STREETS[STREETS.indexOf(round.street) + 1] : round.street,
     }
 
     return {

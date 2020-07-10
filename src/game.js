@@ -13,6 +13,7 @@ const {
   Round,
   Street,
   STREETS,
+  ROUND_STATUS,
   Game,
 } = require("./types")
 const {newCard, newDeck} = require("./card")
@@ -56,6 +57,8 @@ const newRoundExtended = def("newRoundExtended")({})
   ])
   (id => table => button => blinds => cards => deck => ({
     id,
+    status: ROUND_STATUS[0],
+    street: STREETS[0],
     tableId: table.id,
     deck: S.filter(c => !S.elem(c)(S.chain(S.extract)(cards)))(deck),
     communityCards: [],
@@ -82,9 +85,10 @@ const newRound = def("newRound")({})
   ])
   (a => b => c => d => newRoundExtended(a)(b)(c)(d)([])(newDeck("shuffle")))
 
-//    deal :: Street -> Round -> Round
-const deal = def("deal")({})([Street, Round, Round])
-  (street => round => {
+//    deal :: Round -> Round
+const deal = def("deal")({})([Round, Round])
+  (round => {
+    const {street} = round
     if (street === STREETS[0]) {
       const {players, button} = round
       const {deck} = round
@@ -119,7 +123,6 @@ const deal = def("deal")({})([Street, Round, Round])
 
     if (street === STREETS[2] || street === STREETS[3]) {
       const {deck, communityCards} = round
-
       return {
         ...round,
         deck: deck.slice(1),
@@ -200,7 +203,10 @@ const endRound = def("endRound")({})([Game, Game])
           })
           (table.players)
       },
-      round,
+      round: {
+        ...round,
+        status: ROUND_STATUS[1],
+      },
     }
   })
 
