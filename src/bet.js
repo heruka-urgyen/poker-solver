@@ -146,8 +146,10 @@ const bet = def("bet")({})([Bet, Game, Game])
     const betsNotAllIn = S.filter
       (b => S.map(p => p.id)(playersNotAllIn).indexOf(b.playerId) > -1)(updatedBets)
 
-    const balancedAndSomeAllIn = someAllIn && betsNotAllIn.length > 1 &&
-      betsNotAllIn.every((bet, _, bets) => bet.amount === bets[0].amount)
+    const balancedAndSomeAllIn = someAllIn &&
+      (players.length === 2? balanced :
+        betsNotAllIn.length > 1 &&
+        betsNotAllIn.every((bet, _, bets) => bet.amount === bets[0].amount))
 
     const updatedTable = {
       ...table,
@@ -155,9 +157,10 @@ const bet = def("bet")({})([Bet, Game, Game])
     }
 
     if (everyoneAllIn || balancedAndSomeAllIn) {
+      const allIn = everyoneAllIn || someAllIn && players.length === 2
       const updatedRound = {
         ...round,
-        status: everyoneAllIn? ROUND_STATUS[2] : round.status,
+        status: allIn? ROUND_STATUS[2] : round.status,
         bets: [],
         pots: combinePots(round.pots)(calculatePots(updatedBets)),
         nextPlayer,
