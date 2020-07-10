@@ -230,12 +230,14 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
   (id => ({table, round}) => {
     const {players} = table
     const pot = S.reduce(acc => bet => acc + bet.amount)(0)(round.bets)
+    const roundPlayers = S.filter(pid => pid !== id)(round.players)
 
     if (players.length === 2) {
       return {
         table,
         round: {
           ...round,
+          players: roundPlayers,
           bets: [],
           pots: {
             pots: [{players: round.players, amount: pot}],
@@ -245,7 +247,6 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
       }
     } else {
       const bet = round.bets.find(b => b.playerId === id)
-      const roundPlayers = S.filter(pid => pid !== id)(round.players)
 
       if (roundPlayers.length === round.whoActed.length) {
         return {
