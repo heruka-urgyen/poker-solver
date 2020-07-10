@@ -159,7 +159,7 @@ const bet = def("bet")({})([Bet, Game, Game])
         bets: [],
         pots: combinePots(round.pots)(calculatePots(updatedBets)),
         nextPlayer,
-        whoActed,
+        whoActed: [],
         street: STREETS[STREETS.indexOf(round.street) + 1],
       }
 
@@ -176,7 +176,7 @@ const bet = def("bet")({})([Bet, Game, Game])
       pots: endOfStreet?
         combinePots(round.pots)(calculatePots(updatedBets)) : round.pots,
       nextPlayer,
-      whoActed,
+      whoActed: endOfStreet? [] : whoActed,
       street: endOfStreet? STREETS[STREETS.indexOf(round.street) + 1] : round.street,
     }
 
@@ -243,6 +243,13 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
             pots: [{players: round.players, amount: pot}],
             return: [],
           },
+          winners: [{
+            playerId: roundPlayers[0],
+            amount: pot,
+            cards: S.map
+              (S.extract)(S.filter(c => Pair.fst(c) === roundPlayers[0].id)(round.cards)),
+            rank: "High Card",
+          }],
         },
       }
     } else {
