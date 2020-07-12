@@ -175,37 +175,46 @@ const compareHands = def("compareHands")({})([Hand, Hand, $.Array(Hand)])
   })
 
 
-//    selectWinningHands :: [Pair Player.id Cards] -> [Hand]
+//    selectWinningHands :: [Pair Player.id Cards] -> [Maybe Hand]
 const selectWinningHands = def
   ("selectWinningHands")
   ({})
-  ([$.Array($.Pair(Player.types.id)(Cards)), $.Array(Hand)])
+  ([$.Array($.Pair(Player.types.id)(Cards)),
+    $.Array($.RecordType({playerId: Player.types.id, hand: $.Maybe(Hand)}))])
   (css => {
     const ids = S.map(Pair.fst)(css)
     const cards = S.map(Pair.snd)(css)
 
-    const hands0 = S.map(S.compose(S.maybeToNullable)(solveHand))(cards)
-    const hands = S.map(h => ({...h, playerId: ids[hands0.indexOf(h)]}))(hands0)
-
-    if (hands.length === 1) {
-      return hands
+    if (cards.length === 1) {
+      return S.map(id => ({playerId: id, hand: S.Nothing}))(ids)
     }
 
-    return S.extract(S.reduce
-      (acc => h => {
-        const f = Pair.fst(acc)
-        const currentBest = Pair.snd(acc)
-        const nextBest = f(h)
-        const nf = compareHands(nextBest[0])
+    const hands0 = S.map(S.compose(S.maybeToNullable)(solveHand))(cards)
+    const hands = S.map(h => ({...h, playerId: ids[hands0.indexOf(h)]}))(hands0)
+    const handToMaybe =
+      ({playerId, cards, rank}) => ({playerId: playerId, hand: S.Just({cards, rank})})
 
-        if (currentBest.indexOf(nextBest[0]) > -1) {
-          return Pair(nf)(S.concat(currentBest)(nextBest.slice(1)))
-        }
+    if (hands.length === 1) {
+      return S.map(handToMaybe)(hands)
+    }
 
-        return Pair(nf)(nextBest)
-      })
-      (Pair(compareHands(hands[0]))([]))
-      (hands.slice(1)))
+    return S.map
+      (handToMaybe)
+      (S.extract(S.reduce
+        (acc => h => {
+          const f = Pair.fst(acc)
+          const currentBest = Pair.snd(acc)
+          const nextBest = f(h)
+          const nf = compareHands(nextBest[0])
+
+          if (currentBest.indexOf(nextBest[0]) > -1) {
+            return Pair(nf)(S.concat(currentBest)(nextBest.slice(1)))
+          }
+
+          return Pair(nf)(nextBest)
+        })
+        (Pair(compareHands(hands[0]))([]))
+        (hands.slice(1))))
   })
 
 module.exports = {

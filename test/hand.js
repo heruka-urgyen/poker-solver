@@ -30,14 +30,21 @@ test("newDeck without shuffling", t => {
 test("select winning hands from two", t => {
   t.deepEqual(
     selectWinningHands([Pair("1")(highCard), Pair("2")(highCard2)]),
-    [{cards: S.map(newCard)(["Ac", "Kc", "Td", "9c", "7s"]), rank: "High Card", playerId: "2"}]
+    [{
+      playerId: "2",
+      hand: S.Just({
+        cards: S.map(newCard)(["Ac", "Kc", "Td", "9c", "7s"]),
+        rank: "High Card"})}]
   )
 })
 
 test("select winning hands from three", t => {
   t.deepEqual(
     selectWinningHands([Pair("1")(highCard), Pair("2")(pair), Pair("3")(twoPair)]),
-    [{cards: S.map(newCard)(["4c", "4d", "2c", "2h", "Ah"]), rank: "Two Pair", playerId: "3"}]
+    [{
+      playerId: "3",
+      hand: S.Just({
+        cards: S.map(newCard)(["4c", "4d", "2c", "2h", "Ah"]), rank: "Two Pair"})}]
   )
 })
 
@@ -50,9 +57,14 @@ test("select winning hands with more than one winner", t => {
       Pair("4")(straight2),
       Pair("5")(highCard)
     ]),
-    [
-      {cards: S.map(newCard)(["6h", "5d", "4h", "3d", "2c"]), rank: "Straight", playerId: "1"},
-      {cards: S.map(newCard)(["6d", "5s", "4s", "3c", "2d"]), rank: "Straight", playerId: "4"},
+    [{
+      playerId: "1",
+      hand: S.Just({
+        cards: S.map(newCard)(["6h", "5d", "4h", "3d", "2c"]), rank: "Straight"})},
+    {
+      playerId: "4",
+      hand: S.Just({
+        cards: S.map(newCard)(["6d", "5s", "4s", "3c", "2d"]), rank: "Straight"})},
     ]
   )
 })
@@ -67,7 +79,9 @@ test("select winning hands with one winner", t => {
       Pair("5")(highCard),
       Pair("6")(quads)
     ]),
-    [{cards: S.map(newCard)(["2c", "2d", "2h", "2s", "Ah"]), rank: "Quads", playerId: "6"}]
+    [{
+      playerId: "6",
+      hand: S.Just({cards: S.map(newCard)(["2c", "2d", "2h", "2s", "Ah"]), rank: "Quads"})}]
   )
 })
 

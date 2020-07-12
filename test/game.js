@@ -304,38 +304,43 @@ test("computeRoundWinners", t => {
       {
         playerId: "1",
         amount: 0,
-        rank: "Full House",
-        cards: [
-          {rank: "4", suit: "c", value: 3},
-          {rank: "4", suit: "d", value: 3},
-          {rank: "4", suit: "h", value: 3},
-          {rank: "3", suit: "h", value: 2},
-          {rank: "3", suit: "s", value: 2},
-        ],
+        hand: S.Just({
+          rank: "Full House",
+          cards: [
+            {rank: "4", suit: "c", value: 3},
+            {rank: "4", suit: "d", value: 3},
+            {rank: "4", suit: "h", value: 3},
+            {rank: "3", suit: "h", value: 2},
+            {rank: "3", suit: "s", value: 2},
+          ]}),
       },
       {
         playerId: "2",
         amount: 0,
-        rank: "Full House",
-        cards: [
-          {rank: "4", suit: "c", value: 3},
-          {rank: "4", suit: "d", value: 3},
-          {rank: "4", suit: "h", value: 3},
-          {rank: "3", suit: "h", value: 2},
-          {rank: "3", suit: "s", value: 2},
-        ],
+        hand: S.Just({
+          rank: "Full House",
+          cards: [
+            {rank: "4", suit: "c", value: 3},
+            {rank: "4", suit: "d", value: 3},
+            {rank: "4", suit: "h", value: 3},
+            {rank: "3", suit: "h", value: 2},
+            {rank: "3", suit: "s", value: 2},
+          ],
+        }),
       },
       {
         playerId: "3",
         amount: 0,
-        rank: "Full House",
-        cards: [
-          {rank: "4", suit: "c", value: 3},
-          {rank: "4", suit: "d", value: 3},
-          {rank: "4", suit: "h", value: 3},
-          {rank: "3", suit: "h", value: 2},
-          {rank: "3", suit: "s", value: 2},
-        ],
+        hand: S.Just({
+          rank: "Full House",
+          cards: [
+            {rank: "4", suit: "c", value: 3},
+            {rank: "4", suit: "d", value: 3},
+            {rank: "4", suit: "h", value: 3},
+            {rank: "3", suit: "h", value: 2},
+            {rank: "3", suit: "s", value: 2},
+          ]
+        }),
       },
     ]
   )
@@ -390,20 +395,6 @@ test("2-players: leavePlayer", t => {
   const round = {
     ...newRound(1)(table)(0)(Pair(1)(2)),
     bets: [{amount: 20, playerId: "2"}],
-    // cards: [
-    //   Pair("1")([newCard("3h"), newCard("4d")]),
-    //   Pair("2")([newCard("Ac"), newCard("Ad")]),
-    //   Pair("3")([newCard("Ah"), newCard("Kd")]),
-    // ],
-    // communityCards:
-    //   [newCard("As"), newCard("Qc"), newCard("Ts"), newCard("3d"), newCard("9h")],
-    // pots: {
-    //   pots: [
-    //     {players: ["1", "2", "3"], amount: 90},
-    //     {players: ["1", "3"], amount: 40},
-    //   ],
-    //   return: [],
-    // },
   }
 
   const game = {
@@ -414,6 +405,7 @@ test("2-players: leavePlayer", t => {
   const run = newGame(game)
   const [r1, r2, r3] = [
     leavePlayer("2"),
+    s => ({...s, round: computeRoundWinners(s.round)}),
   ].map(run)
 
   t.deepEqual(
@@ -440,6 +432,66 @@ test("2-players: leavePlayer", t => {
       return: [],
     },
   )
+})
+
+test("2-players: leavePlayer preflop", t => {
+  const table = {
+    id: 1,
+    players: [{id: "1", stack: 0}, {id: "2", stack: 20}],
+    maxPlayers: 3,
+  }
+
+  const round = {
+    ...newRound(1)(table)(0)(Pair(1)(2)),
+    bets: [{amount: 20, playerId: "1"}],
+    cards: [
+      Pair("1")([newCard("3h"), newCard("4d")]),
+      Pair("2")([newCard("Ac"), newCard("Ad")]),
+    ],
+    communityCards: [],
+  }
+
+  const game = {
+    table,
+    round,
+  }
+
+  const run = newGame(game)
+  const [r1, r2, r3] = [
+    leavePlayer("1"),
+    s => ({...s, round: computeRoundWinners(s.round)}),
+  ].map(run)
+
+  t.deepEqual(
+    r1.table.players,
+    [{id: "2", stack: 20}],
+  )
+
+  t.deepEqual(
+    r1.round.players,
+    ["2"],
+  )
+
+  t.deepEqual(
+    r1.round.bets,
+    [],
+  )
+
+  t.deepEqual(
+    r1.round.pots,
+    {
+      pots: [
+        {players: ["2"], amount: 20},
+      ],
+      return: [],
+    },
+  )
+
+  t.deepEqual(
+    r2.round.winners.map(w => w.playerId),
+    ["2"]
+  )
+
 })
 
 test("3-players: leavePlayer", t => {

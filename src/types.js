@@ -101,8 +101,7 @@ const Round = $.NamedRecordType("Round")("")([])
     winners: $.Array($.RecordType({
       playerId: Player.types.id,
       amount: Pot.types.amount,
-      cards: Cards,
-      rank: HandRank,
+      hand: $.Maybe(Hand),
     })),
   })
 

@@ -269,9 +269,10 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
           winners: [{
             playerId: roundPlayers[0],
             amount: pot,
-            cards: S.map
-              (S.extract)(S.filter(c => Pair.fst(c) === roundPlayers[0].id)(round.cards)),
-            rank: "High Card",
+            hand: S.Just({
+              cards: S.map
+                (S.extract)(S.filter(c => Pair.fst(c) === roundPlayers[0].id)(round.cards)),
+              rank: "High Card",}),
           }],
         },
       }
