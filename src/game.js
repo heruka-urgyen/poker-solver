@@ -42,6 +42,47 @@ const sitPlayer = def("sitPlayer")({})([Table, Player, Table])
     })(table)(player),
   }))
 
+//    leavePlayer :: Player -> Game -> Game
+const leavePlayer = def("leavePlayer")({})([Player.types.id, Game, Game])
+  (playerId => ({table, round}) => {
+    const updatedPlayers = S.filter(p => p.id !== playerId)(table.players)
+    const maybeBet = S.find(b => b.playerId === playerId)(round.bets)
+    const updatedBets = S.filter(b => b.playerId !== playerId)(round.bets)
+    const updatedPots = round.pots.pots.length > 0? S.map
+      (pots => {
+        return S.map(({players, amount}) => {
+          const updatedPotPlayers =  S.filter(id => id !== playerId)(players)
+
+          if (players.length === round.players.length) {
+            return {
+              players: updatedPotPlayers,
+              amount: S.maybe(amount)(b => amount + b.amount)(maybeBet),
+            }
+          }
+
+          return {players: updatedPotPlayers, amount}
+        })(pots)
+      })(round.pots) :
+      {
+        return: [],
+        pots: [{
+          players: S.map(p => p.id)(updatedPlayers),
+          amount: S.maybe(0)(b => b.amount)(maybeBet)}]}
+
+      return {
+        table: {
+          ...table,
+          players: updatedPlayers,
+        },
+        round: {
+          ...round,
+          players: S.map(p => p.id)(updatedPlayers),
+          bets: updatedBets,
+          pots: updatedPots,
+        },
+      }
+  })
+
 //    Blinds = Pair Positive Int, Positive Int
 //    Hole Cards = [Pair Player.id [Card]]
 //    newRoundExtended :: Int -> Table -> Int -> Blinds -> Hole Cards -> [Card] -> Round
@@ -211,6 +252,7 @@ const newGame = def("newGame")({})([Game, $.AnyFunction])
 module.exports = {
   newTable,
   sitPlayer,
+  leavePlayer,
   newRoundExtended,
   newRound,
   deal,

@@ -6,6 +6,7 @@ const Pair = require("sanctuary-pair")
 const {
   newTable,
   sitPlayer,
+  leavePlayer,
   newRoundExtended,
   newRound,
   deal,
@@ -376,6 +377,143 @@ test("end round", t => {
   t.deepEqual(
     r1.table.players,
     [{id: "1", stack: 40}, {id: "2", stack: 90}, {id: "3", stack: 20}],
+  )
+})
+
+test("2-players: leavePlayer", t => {
+  const table = {
+    id: 1,
+    players: [{id: "1", stack: 0}, {id: "2", stack: 0}],
+    maxPlayers: 3,
+  }
+
+  const round = {
+    ...newRound(1)(table)(0)(Pair(1)(2)),
+    bets: [{amount: 20, playerId: "2"}],
+    // cards: [
+    //   Pair("1")([newCard("3h"), newCard("4d")]),
+    //   Pair("2")([newCard("Ac"), newCard("Ad")]),
+    //   Pair("3")([newCard("Ah"), newCard("Kd")]),
+    // ],
+    // communityCards:
+    //   [newCard("As"), newCard("Qc"), newCard("Ts"), newCard("3d"), newCard("9h")],
+    // pots: {
+    //   pots: [
+    //     {players: ["1", "2", "3"], amount: 90},
+    //     {players: ["1", "3"], amount: 40},
+    //   ],
+    //   return: [],
+    // },
+  }
+
+  const game = {
+    table,
+    round,
+  }
+
+  const run = newGame(game)
+  const [r1, r2, r3] = [
+    leavePlayer("2"),
+  ].map(run)
+
+  t.deepEqual(
+    r1.table.players,
+    [{id: "1", stack: 0}],
+  )
+
+  t.deepEqual(
+    r1.round.players,
+    ["1"],
+  )
+
+  t.deepEqual(
+    r1.round.bets,
+    [],
+  )
+
+  t.deepEqual(
+    r1.round.pots,
+    {
+      pots: [
+        {players: ["1"], amount: 20},
+      ],
+      return: [],
+    },
+  )
+})
+
+test("3-players: leavePlayer", t => {
+  const table = {
+    id: 1,
+    players: [{id: "1", stack: 0}, {id: "2", stack: 0}, {id: "3", stack: 20}],
+    maxPlayers: 3,
+  }
+
+  const round = {
+    ...newRound(1)(table)(0)(Pair(1)(2)),
+    bets: [{amount: 20, playerId: "3"}],
+    cards: [
+      Pair("1")([newCard("3h"), newCard("4d")]),
+      Pair("2")([newCard("Ac"), newCard("Ad")]),
+      Pair("3")([newCard("Ah"), newCard("Kd")]),
+    ],
+    communityCards:
+      [newCard("As"), newCard("Qc"), newCard("Ts"), newCard("3d"), newCard("9h")],
+    pots: {
+      pots: [
+        {players: ["1", "2", "3"], amount: 90},
+        {players: ["1", "3"], amount: 40},
+      ],
+      return: [],
+    },
+  }
+
+  const game = {
+    table,
+    round,
+  }
+
+  const run = newGame(game)
+  const [r1, r2, r3] = [
+    leavePlayer("3"),
+    s => ({...s, round: computeRoundWinners(s.round)}),
+    endRound,
+  ].map(run)
+
+  t.deepEqual(
+    r1.table.players,
+    [{id: "1", stack: 0}, {id: "2", stack: 0}],
+  )
+
+  t.deepEqual(
+    r1.round.players,
+    ["1", "2"],
+  )
+
+  t.deepEqual(
+    r1.round.bets,
+    [],
+  )
+
+  t.deepEqual(
+    r1.round.pots,
+    {
+      pots: [
+        {players: ["1", "2"], amount: 110},
+        {players: ["1"], amount: 40},
+      ],
+      return: [],
+    },
+  )
+
+  t.deepEqual(
+    r2.round.winners.map(w => w.playerId),
+    ["2", "1"]
+  )
+
+  t.deepEqual(
+    r3.table.players,
+    [{id: "1", stack: 40}, {id: "2", stack: 110}],
   )
 })
 

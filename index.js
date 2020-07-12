@@ -5,6 +5,7 @@ const {bet, fold, calculatePots, postBlinds} = require("./src/bet")
 const {
   newTable,
   sitPlayer,
+  leavePlayer,
   newRound,
   newRoundExtended,
   deal,
@@ -34,6 +35,7 @@ module.exports = {
 
   newTable,
   sitPlayer,
+  leavePlayer,
   newRound,
   newRoundExtended,
   deal,
