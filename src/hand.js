@@ -187,6 +187,10 @@ const selectWinningHands = def
     const hands0 = S.map(S.compose(S.maybeToNullable)(solveHand))(cards)
     const hands = S.map(h => ({...h, playerId: ids[hands0.indexOf(h)]}))(hands0)
 
+    if (hands.length === 1) {
+      return hands
+    }
+
     return S.extract(S.reduce
       (acc => h => {
         const f = Pair.fst(acc)
