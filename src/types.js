@@ -49,7 +49,7 @@ const Player = $.NamedRecordType("Player")("")([])
 //    Table :: Type
 const Table = $.NamedRecordType("Table")("")([])
   ({
-    id: $.PositiveInteger,
+    id: $.String,
     maxPlayers: $.PositiveInteger,
     players: $.Array(Player),
   })

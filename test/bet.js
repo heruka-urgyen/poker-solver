@@ -7,17 +7,17 @@ const {newDeck} = require("../src/card")
 const {ROUND_STATUS} = require("../src/types")
 
 const table1 = {
-  id: 1,
+  id: "1",
   maxPlayers: 2,
   players: [{id: "1", stack: 50}, {id: "2", stack: 30}],}
 
 const table2 = {
-  id: 1,
+  id: "1",
   maxPlayers: 3,
   players: [{id: "1", stack: 50}, {id: "2", stack: 30}, {id: "3", stack: 70}],}
 
 const table3 = {
-  id: 1,
+  id: "1",
   maxPlayers: 4,
   players: [
     {id: "1", stack: 50},

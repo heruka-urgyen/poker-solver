@@ -23,29 +23,29 @@ const deck = newDeck("order")
 
 test("newTable", t => {
   t.deepEqual(
-    newTable(1)(9),
-    {id: 1, maxPlayers: 9, players: []}
+    newTable("1")(9),
+    {id: "1", maxPlayers: 9, players: []}
   )
 })
 
 test("sitPlayer at empty table", t => {
   t.deepEqual(
-    sitPlayer(newTable(1)(9))({id: "1"}),
-    {id: 1, maxPlayers: 9, players: [{id: "1"}]}
+    sitPlayer(newTable("1")(9))({id: "1"}),
+    {id: "1", maxPlayers: 9, players: [{id: "1"}]}
   )
 })
 
 test("sitPlayer at non-empty table", t => {
   t.deepEqual(
-    sitPlayer({id: 1, maxPlayers: 9, players: [{id: "1"}, {id: "2"}]})({id: "3"}),
-    {id: 1, maxPlayers: 9, players: [{id: "1"}, {id: "2"}, {id: "3"}]}
+    sitPlayer({id: "1", maxPlayers: 9, players: [{id: "1"}, {id: "2"}]})({id: "3"}),
+    {id: "1", maxPlayers: 9, players: [{id: "1"}, {id: "2"}, {id: "3"}]}
   )
 })
 
 test("sitPlayer at full table", t => {
   t.deepEqual(
-    sitPlayer({id: 1, maxPlayers: 2, players: [{id: "1"}, {id: "2"}]})({id: "3"}),
-    {id: 1, maxPlayers: 2, players: [{id: "1"}, {id: "2"}]}
+    sitPlayer({id: "1", maxPlayers: 2, players: [{id: "1"}, {id: "2"}]})({id: "3"}),
+    {id: "1", maxPlayers: 2, players: [{id: "1"}, {id: "2"}]}
   )
 })
 
@@ -53,7 +53,7 @@ test("newRoundExtended", t => {
   t.deepEqual(
     newRoundExtended
       ("1")
-      ({id: 1, maxPlayers: 3, players: [{id: "1"}, {id: "2"}, {id: "3"}]})
+      ({id: "1", maxPlayers: 3, players: [{id: "1"}, {id: "2"}, {id: "3"}]})
       (0)
       (Pair(1)(2))
       ([Pair("2")([newCard("As"), newCard("Kc")])])
@@ -62,7 +62,7 @@ test("newRoundExtended", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[0],
-      tableId: 1,
+      tableId: "1",
       deck: S.filter(c => !(showCard(c) === "As" || showCard(c) === "Kc"))(deck),
       communityCards: [],
       cards: [
@@ -86,7 +86,7 @@ test("deal preflop", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[0],
-      tableId: 1,
+      tableId: "1",
       deck,
       communityCards: [],
       cards: [],
@@ -101,7 +101,7 @@ test("deal preflop", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[0],
-      tableId: 1,
+      tableId: "1",
       deck: deck.slice(6),
       communityCards: [],
       cards: [
@@ -125,7 +125,7 @@ test("deal flop", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[1],
-      tableId: 1,
+      tableId: "1",
       deck: deck.slice(6),
       communityCards: [],
       cards: [
@@ -144,7 +144,7 @@ test("deal flop", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[1],
-      tableId: 1,
+      tableId: "1",
       deck: deck.slice(9),
       communityCards: [
         {rank: "3", suit: "h", value: 2},
@@ -172,7 +172,7 @@ test("deal turn", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[2],
-      tableId: 1,
+      tableId: "1",
       deck: deck.slice(9),
       communityCards: [
         {rank: "3", suit: "h", value: 2},
@@ -195,7 +195,7 @@ test("deal turn", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[2],
-      tableId: 1,
+      tableId: "1",
       deck: deck.slice(10),
       communityCards: [
         {rank: "3", suit: "h", value: 2},
@@ -224,7 +224,7 @@ test("deal river", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[3],
-      tableId: 1,
+      tableId: "1",
       deck: deck.slice(10),
       communityCards: [
         {rank: "3", suit: "h", value: 2},
@@ -248,7 +248,7 @@ test("deal river", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[3],
-      tableId: 1,
+      tableId: "1",
       deck: deck.slice(11),
       communityCards: [
         {rank: "3", suit: "h", value: 2},
@@ -277,7 +277,7 @@ test("computeRoundWinners", t => {
     id: "1",
     status: ROUND_STATUS[0],
     street: STREETS[4],
-    tableId: 1,
+    tableId: "1",
     deck: deck.slice(11),
     communityCards: [
       {rank: "3", suit: "h", value: 2},
@@ -349,7 +349,7 @@ test("computeRoundWinners", t => {
 
 test("end round", t => {
   const table = {
-    id: 1,
+    id: "1",
     players: [{id: "1", stack: 0}, {id: "2", stack: 0}, {id: "3", stack: 20}],
     maxPlayers: 3,
   }
@@ -388,7 +388,7 @@ test("end round", t => {
 
 test("2-players: leavePlayer", t => {
   const table = {
-    id: 1,
+    id: "1",
     players: [{id: "1", stack: 0}, {id: "2", stack: 0}],
     maxPlayers: 3,
   }
@@ -437,7 +437,7 @@ test("2-players: leavePlayer", t => {
 
 test("2-players: leavePlayer preflop", t => {
   const table = {
-    id: 1,
+    id: "1",
     players: [{id: "1", stack: 0}, {id: "2", stack: 20}],
     maxPlayers: 3,
   }
@@ -497,7 +497,7 @@ test("2-players: leavePlayer preflop", t => {
 
 test("3-players: leavePlayer", t => {
   const table = {
-    id: 1,
+    id: "1",
     players: [{id: "1", stack: 0}, {id: "2", stack: 0}, {id: "3", stack: 20}],
     maxPlayers: 3,
   }
@@ -572,7 +572,7 @@ test("3-players: leavePlayer", t => {
 
 test("play round", t => {
   const table =
-    sitPlayer(sitPlayer(newTable(1)(2))({id: "1", stack: 100}))({id: "2", stack: 100})
+    sitPlayer(sitPlayer(newTable("1")(2))({id: "1", stack: 100}))({id: "2", stack: 100})
   const round = newRound("1")(table)(0)(Pair(1)(2))
 
   const run = newGame({table, round})

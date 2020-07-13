@@ -20,7 +20,7 @@ const {newCard, newDeck} = require("./card")
 const {selectWinningHands} = require("./hand")
 
 //    newTable :: Int -> Int -> Table
-const newTable = def("newTable")({})([$.PositiveInteger, $.PositiveInteger, Table])
+const newTable = def("newTable")({})([Table.types.id, Table.types.maxPlayers, Table])
   (id => maxPlayers => ({
     id,
     maxPlayers,
