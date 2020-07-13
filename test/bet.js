@@ -28,7 +28,7 @@ const table3 = {
 test("2-player: bet - fold", t => {
   const initialState = {
     table: table1,
-    round: newRound(1)(table1)(0)(Pair(1)(2)),
+    round: newRound("1")(table1)(0)(Pair(1)(2)),
   }
 
   const res1 = {
@@ -60,7 +60,7 @@ test("2-player: bet - fold", t => {
 test("2-player: call - check - bet - fold", t => {
   const initialState = {
     table: table1,
-    round: newRound(1)(table1)(0)(Pair(1)(2)),
+    round: newRound("1")(table1)(0)(Pair(1)(2)),
   }
 
   const res1 = {
@@ -112,7 +112,7 @@ test("2-player: call - check - bet - fold", t => {
 test("3-player: bet - fold - call", t => {
   const initialState = {
     table: table2,
-    round: newRound(1)(table2)(2)(Pair(1)(2)),
+    round: newRound("1")(table2)(2)(Pair(1)(2)),
   }
 
   const res1 = {
@@ -157,7 +157,7 @@ test("3-player: bet - fold - call", t => {
 test("3-player: bet - call - fold", t => {
   const initialState = {
     table: table2,
-    round: newRound(1)(table2)(2)(Pair(1)(2)),
+    round: newRound("1")(table2)(2)(Pair(1)(2)),
   }
 
   const res1 = {
@@ -202,7 +202,7 @@ test("3-player: bet - call - fold", t => {
 test("2-player: post blinds", t => {
   const initialState = {
     table: table1,
-    round: newRound(1)(table1)(0)(Pair(1)(2)),
+    round: newRound("1")(table1)(0)(Pair(1)(2)),
   }
 
   const res1 = {
@@ -223,7 +223,7 @@ test("2-player: call - call", t => {
   const initialState = {
     table: table1,
     round: {
-      ...newRound(1)(table1)(0)(Pair(1)(2)),
+      ...newRound("1")(table1)(0)(Pair(1)(2)),
       pots: {
         pots: [{amount: 4, players: ["1", "2"]}],
         return: [],
@@ -262,7 +262,7 @@ test("2-player: call - call", t => {
 test("2-player: call - check", t => {
   const initialState = {
     table: table1,
-    round: newRound(1)(table1)(0)(Pair(1)(2)),
+    round: newRound("1")(table1)(0)(Pair(1)(2)),
   }
 
   const res1 = {
@@ -294,7 +294,7 @@ test("2-player: call - check", t => {
 test("3-player: all in - all in - all in", t => {
   const initialState = {
     table: table2,
-    round: newRound(1)(table2)(2)(Pair(1)(2)),
+    round: newRound("1")(table2)(2)(Pair(1)(2)),
   }
 
   const res1 = {
@@ -338,7 +338,7 @@ test("3-player: all in - all in - all in", t => {
 test("4-player: bet - all in - bet - call - call", t => {
   const initialState = {
     table: table3,
-    round: newRound(1)(table3)(1)(Pair(1)(2)),
+    round: newRound("1")(table3)(1)(Pair(1)(2)),
   }
 
   const res1 = {

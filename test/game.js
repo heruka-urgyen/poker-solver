@@ -14,6 +14,7 @@ const {
   endRound,
   newGame,
 } = require ("../src/game")
+
 const {STREETS, ROUND_STATUS} = require("../src/types")
 const {newCard, showCard, newDeck} = require("../src/card")
 const {postBlinds, bet} = require("../src/bet")
@@ -51,14 +52,14 @@ test("sitPlayer at full table", t => {
 test("newRoundExtended", t => {
   t.deepEqual(
     newRoundExtended
-      (1)
+      ("1")
       ({id: 1, maxPlayers: 3, players: [{id: "1"}, {id: "2"}, {id: "3"}]})
       (0)
       (Pair(1)(2))
       ([Pair("2")([newCard("As"), newCard("Kc")])])
       (deck),
     {
-      id: 1,
+      id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[0],
       tableId: 1,
@@ -82,7 +83,7 @@ test("newRoundExtended", t => {
 test("deal preflop", t => {
   t.deepEqual(
     deal({
-      id: 1,
+      id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[0],
       tableId: 1,
@@ -97,7 +98,7 @@ test("deal preflop", t => {
       winners: [],
     }),
     {
-      id: 1,
+      id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[0],
       tableId: 1,
@@ -121,7 +122,7 @@ test("deal preflop", t => {
 test("deal flop", t => {
   t.deepEqual(
     deal({
-      id: 1,
+      id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[1],
       tableId: 1,
@@ -140,7 +141,7 @@ test("deal flop", t => {
       winners: [],
     }),
     {
-      id: 1,
+      id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[1],
       tableId: 1,
@@ -168,7 +169,7 @@ test("deal flop", t => {
 test("deal turn", t => {
   t.deepEqual(
     deal({
-      id: 1,
+      id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[2],
       tableId: 1,
@@ -191,7 +192,7 @@ test("deal turn", t => {
       winners: [],
     }),
     {
-      id: 1,
+      id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[2],
       tableId: 1,
@@ -220,7 +221,7 @@ test("deal turn", t => {
 test("deal river", t => {
   t.deepEqual(
     deal({
-      id: 1,
+      id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[3],
       tableId: 1,
@@ -244,7 +245,7 @@ test("deal river", t => {
       winners: [],
     }),
     {
-      id: 1,
+      id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[3],
       tableId: 1,
@@ -273,7 +274,7 @@ test("deal river", t => {
 
 test("computeRoundWinners", t => {
   const result = computeRoundWinners({
-    id: 1,
+    id: "1",
     status: ROUND_STATUS[0],
     street: STREETS[4],
     tableId: 1,
@@ -354,7 +355,7 @@ test("end round", t => {
   }
 
   const round = {
-    ...newRound(1)(table)(0)(Pair(1)(2)),
+    ...newRound("1")(table)(0)(Pair(1)(2)),
     cards: [
       Pair("1")([newCard("Ah"), newCard("Kd")]),
       Pair("2")([newCard("Ac"), newCard("Ad")]),
@@ -393,7 +394,7 @@ test("2-players: leavePlayer", t => {
   }
 
   const round = {
-    ...newRound(1)(table)(0)(Pair(1)(2)),
+    ...newRound("1")(table)(0)(Pair(1)(2)),
     bets: [{amount: 20, playerId: "2"}],
   }
 
@@ -442,7 +443,7 @@ test("2-players: leavePlayer preflop", t => {
   }
 
   const round = {
-    ...newRound(1)(table)(0)(Pair(1)(2)),
+    ...newRound("1")(table)(0)(Pair(1)(2)),
     bets: [{amount: 20, playerId: "1"}],
     cards: [
       Pair("1")([newCard("3h"), newCard("4d")]),
@@ -502,7 +503,7 @@ test("3-players: leavePlayer", t => {
   }
 
   const round = {
-    ...newRound(1)(table)(0)(Pair(1)(2)),
+    ...newRound("1")(table)(0)(Pair(1)(2)),
     bets: [{amount: 20, playerId: "3"}],
     cards: [
       Pair("1")([newCard("3h"), newCard("4d")]),
@@ -572,7 +573,7 @@ test("3-players: leavePlayer", t => {
 test("play round", t => {
   const table =
     sitPlayer(sitPlayer(newTable(1)(2))({id: "1", stack: 100}))({id: "2", stack: 100})
-  const round = newRound(1)(table)(0)(Pair(1)(2))
+  const round = newRound("1")(table)(0)(Pair(1)(2))
 
   const run = newGame({table, round})
 
@@ -592,7 +593,7 @@ test("play round", t => {
     bet({playerId: "2", amount: 88}),
     s => ({...s, round: computeRoundWinners(s.round)}),
     endRound,
-    s => ({...s, round: newRound(2)(table)(1)(Pair(1)(2))}),
+    s => ({...s, round: newRound("2")(table)(1)(Pair(1)(2))}),
   ].map(run)
 
   t.deepEqual(
@@ -704,6 +705,6 @@ test("play round", t => {
 
   t.deepEqual(
     r16.round,
-    newRoundExtended(2)(r16.table)(1)(Pair(1)(2))(r16.round.cards)(r16.round.deck)
+    newRoundExtended("2")(r16.table)(1)(Pair(1)(2))(r16.round.cards)(r16.round.deck)
   )
 })

@@ -86,7 +86,7 @@ const Pots = $.NamedRecordType("Pots")("")([])
 //    Round :: Type
 const Round = $.NamedRecordType("Round")("")([])
   ({
-    id: $.PositiveInteger,
+    id: $.String,
     status: RoundStatus,
     street: Street,
     tableId: Table.types.id,
