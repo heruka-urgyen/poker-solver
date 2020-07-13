@@ -2,6 +2,8 @@ const $ = require("sanctuary-def")
 const S = require("sanctuary")
 const Pair = require("sanctuary-pair")
 
+const uuid = require("uuid")
+
 const {
   def,
   CARD_SUITS,
@@ -234,10 +236,25 @@ const endRound = def("endRound")({})([Game, Game])
     }
   })
 
+
+const newRoundId = uuid.v4
+
 //    newGame :: Game -> Game
 const newGame = def("newGame")({})([Game, $.AnyFunction])
-  (game => {
-    let _state = game
+  (({table, round}) => {
+    let _state = {
+      table,
+      round: {
+        ...newRoundExtended
+          (newRoundId())
+          (table)
+          (0)
+          (Pair(1)(2))
+          ([])
+          (newDeck("shuffle")),
+        ...round,
+      }
+    }
 
     return f => {
       const newState = f(_state)

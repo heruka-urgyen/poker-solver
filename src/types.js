@@ -110,7 +110,7 @@ const Round = $.NamedRecordType("Round")("")([])
 const Game = $.NamedRecordType("Game")("")([])
   ({
     table: Table,
-    round: Round,
+    round: $.Object,
   })
 
 module.exports = {
