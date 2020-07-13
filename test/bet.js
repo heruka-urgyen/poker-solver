@@ -28,7 +28,7 @@ const table3 = {
 test("2-player: bet - fold", t => {
   const initialState = {
     table: table1,
-    round: newRound("1")(table1)(0)(Pair(1)(2)),
+    round: {}
   }
 
   const res1 = {
@@ -60,7 +60,7 @@ test("2-player: bet - fold", t => {
 test("2-player: call - check - bet - fold", t => {
   const initialState = {
     table: table1,
-    round: newRound("1")(table1)(0)(Pair(1)(2)),
+    round: {},
   }
 
   const res1 = {
@@ -112,7 +112,7 @@ test("2-player: call - check - bet - fold", t => {
 test("3-player: bet - fold - call", t => {
   const initialState = {
     table: table2,
-    round: newRound("1")(table2)(2)(Pair(1)(2)),
+    round: {button: 1},
   }
 
   const res1 = {
@@ -142,7 +142,8 @@ test("3-player: bet - fold - call", t => {
   }
 
   const run = newGame(initialState)
-  const [_, r1, r2, r3] = [
+  const [_1, _2, r1, r2, r3] = [
+    newRound,
     postBlinds,
     bet({playerId: "3", amount: 10}),
     fold("1"),
@@ -157,7 +158,7 @@ test("3-player: bet - fold - call", t => {
 test("3-player: bet - call - fold", t => {
   const initialState = {
     table: table2,
-    round: newRound("1")(table2)(2)(Pair(1)(2)),
+    round: {button: 1},
   }
 
   const res1 = {
@@ -187,7 +188,8 @@ test("3-player: bet - call - fold", t => {
   }
 
   const run = newGame(initialState)
-  const [_, r1, r2, r3] = [
+  const [_1, _2, r1, r2, r3] = [
+    newRound,
     postBlinds,
     bet({playerId: "3", amount: 10}),
     bet({playerId: "1", amount: 9}),
@@ -202,7 +204,7 @@ test("3-player: bet - call - fold", t => {
 test("2-player: post blinds", t => {
   const initialState = {
     table: table1,
-    round: newRound("1")(table1)(0)(Pair(1)(2)),
+    round: {},
   }
 
   const res1 = {
@@ -223,7 +225,6 @@ test("2-player: call - call", t => {
   const initialState = {
     table: table1,
     round: {
-      ...newRound("1")(table1)(0)(Pair(1)(2)),
       pots: {
         pots: [{amount: 4, players: ["1", "2"]}],
         return: [],
@@ -262,7 +263,7 @@ test("2-player: call - call", t => {
 test("2-player: call - check", t => {
   const initialState = {
     table: table1,
-    round: newRound("1")(table1)(0)(Pair(1)(2)),
+    round: {},
   }
 
   const res1 = {
@@ -294,7 +295,7 @@ test("2-player: call - check", t => {
 test("3-player: all in - all in - all in", t => {
   const initialState = {
     table: table2,
-    round: newRound("1")(table2)(2)(Pair(1)(2)),
+    round: {button: 1},
   }
 
   const res1 = {
@@ -322,7 +323,8 @@ test("3-player: all in - all in - all in", t => {
     },}
 
   const run = newGame(initialState)
-  const [_, r1, r2, r3] = [
+  const [_1, _2, r1, r2, r3] = [
+    newRound,
     postBlinds,
     bet({playerId: "1", amount: 49}),
     bet({playerId: "2", amount: 28}),
@@ -338,7 +340,7 @@ test("3-player: all in - all in - all in", t => {
 test("4-player: bet - all in - bet - call - call", t => {
   const initialState = {
     table: table3,
-    round: newRound("1")(table3)(1)(Pair(1)(2)),
+    round: {button: 0},
   }
 
   const res1 = {
@@ -408,7 +410,8 @@ test("4-player: bet - all in - bet - call - call", t => {
     },}
 
   const run = newGame(initialState)
-  const [_, r1, r2, r3, r4, r5] = [
+  const [_1, _2, r1, r2, r3, r4, r5] = [
+    newRound,
     postBlinds,
     bet({playerId: "1", amount: 10}),
     bet({playerId: "2", amount: 30}),

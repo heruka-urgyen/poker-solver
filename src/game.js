@@ -131,17 +131,20 @@ const newRoundExtended = def("newRoundExtended")({})
     winners: [],
   }))
 
-//    Blinds = Pair Positive Int, Positive Int
-//    newRound :: Int -> Table -> Int -> Blinds -> Round
-const newRound = def("newRound")({})
-  ([
-    Round.types.id,
-    Table,
-    Round.types.button,
-    Round.types.blinds,
-    Round,
-  ])
-  (a => b => c => d => newRoundExtended(a)(b)(c)(d)([])(newDeck("shuffle")))
+//    newRound :: Game -> Game
+const newRound = def("newRound")({})([Game, Game])
+  (({table, round}) => {
+    return {
+      table,
+      round: newRoundExtended
+        (newRoundId())
+        (table)
+        ((round.button + 1) % table.players.length)
+        (round.blinds)
+        ([])
+        (newDeck("shuffle")),
+    }
+  })
 
 //    deal :: Round -> Round
 const deal = def("deal")({})([Round, Round])
@@ -266,7 +269,7 @@ const newGame = def("newGame")({})([Game, $.AnyFunction])
             (Pair(1)(2))
             ([])
             (newDeck("shuffle")),
-          ...round,
+        ...round,
       }
     }
 
