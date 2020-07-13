@@ -29,20 +29,34 @@ const newTable = def("newTable")({})([Table.types.id, Table.types.maxPlayers, Ta
     players: [],
   }))
 
-//    sitPlayer :: Table -> Player -> Table
-const sitPlayer = def("sitPlayer")({})([Table, Player, Table])
-  (table => player => ({
-    ...table,
-    ...(t => p => {
-      const newPlayers = S.append(p)(t.players)
+const updatePlayers = t => p => {
+  const newPlayers = S.append(p)(t.players)
 
-      if (newPlayers.length > t.maxPlayers) {
-        return {players: t.players}
-      }
+  if (newPlayers.length > t.maxPlayers) {
+    return t.players
+  }
 
-      return {players: newPlayers}
-    })(table)(player),
-  }))
+  return newPlayers
+}
+
+//    sitPlayer :: Player -> Game -> Game
+const sitPlayer = def("sitPlayer")({})([Player, Game, Game])
+  (player => ({table, round}) => {
+    const updatedPlayers = updatePlayers(table)(player)
+
+    return {
+      table: {
+        ...table,
+        players: updatedPlayers,
+      },
+      round: {
+        ...round,
+        players: round.status === ROUND_STATUS[1]?
+          S.map(p => p.id)(updatedPlayers) :
+          round.players,
+      },
+    }
+  })
 
 //    leavePlayer :: Player -> Game -> Game
 const leavePlayer = def("leavePlayer")({})([Player.types.id, Game, Game])
@@ -246,13 +260,13 @@ const newGame = def("newGame")({})([Game, $.AnyFunction])
       table,
       round: {
         ...newRoundExtended
-          (newRoundId())
-          (table)
-          (0)
-          (Pair(1)(2))
-          ([])
-          (newDeck("shuffle")),
-        ...round,
+            (newRoundId())
+            (table)
+            (0)
+            (Pair(1)(2))
+            ([])
+            (newDeck("shuffle")),
+          ...round,
       }
     }
 

@@ -29,24 +29,33 @@ test("newTable", t => {
 })
 
 test("sitPlayer at empty table", t => {
-  t.deepEqual(
-    sitPlayer(newTable("1")(9))({id: "1"}),
-    {id: "1", maxPlayers: 9, players: [{id: "1"}]}
-  )
+  const table = newTable("1")(9)
+
+  const game1 = {table, round: {status: "FINISHED"}}
+  const game2 = sitPlayer({id: "1"})(game1)
+
+  t.deepEqual(game2.table.players,[{id: "1"}])
+  t.deepEqual(game2.round.players,["1"])
 })
 
 test("sitPlayer at non-empty table", t => {
-  t.deepEqual(
-    sitPlayer({id: "1", maxPlayers: 9, players: [{id: "1"}, {id: "2"}]})({id: "3"}),
-    {id: "1", maxPlayers: 9, players: [{id: "1"}, {id: "2"}, {id: "3"}]}
-  )
+  const table = {id: "1", maxPlayers: 9, players: [{id: "1"}, {id: "2"}]}
+
+  const game1 = {table, round: {status: "FINISHED"}}
+  const game2 = sitPlayer({id: "3"})(game1)
+
+  t.deepEqual(game2.table.players,[{id: "1"}, {id: "2"}, {id: "3"}])
+  t.deepEqual(game2.round.players,["1", "2", "3"])
 })
 
 test("sitPlayer at full table", t => {
-  t.deepEqual(
-    sitPlayer({id: "1", maxPlayers: 2, players: [{id: "1"}, {id: "2"}]})({id: "3"}),
-    {id: "1", maxPlayers: 2, players: [{id: "1"}, {id: "2"}]}
-  )
+  const table = {id: "1", maxPlayers: 2, players: [{id: "1"}, {id: "2"}]}
+
+  const game1 = {table, round: {status: "FINISHED"}}
+  const game2 = sitPlayer({id: "3"})(game1)
+
+  t.deepEqual(game2.table.players,[{id: "1"}, {id: "2"}])
+  t.deepEqual(game2.round.players,["1", "2"])
 })
 
 test("newRoundExtended", t => {
@@ -571,13 +580,12 @@ test("3-players: leavePlayer", t => {
 })
 
 test("play round", t => {
-  const table =
-    sitPlayer(sitPlayer(newTable("1")(2))({id: "1", stack: 100}))({id: "2", stack: 100})
-  const round = newRound("1")(table)(0)(Pair(1)(2))
+  const table = newTable("1")(2)
+  const run = newGame({table, round: {status: "FINISHED"}})
 
-  const run = newGame({table, round})
-
-  const [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16] = [
+  const [_1, _2, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16] = [
+    sitPlayer({id: "1", stack: 100}),
+    sitPlayer({id: "2", stack: 100}),
     postBlinds,
     s => ({...s, round: deal(s.round)}),
     bet({playerId: "1", amount: 1}),
@@ -593,7 +601,7 @@ test("play round", t => {
     bet({playerId: "2", amount: 88}),
     s => ({...s, round: computeRoundWinners(s.round)}),
     endRound,
-    s => ({...s, round: newRound("2")(table)(1)(Pair(1)(2))}),
+    s => ({...s, round: newRound("2")(s.table)(1)(Pair(1)(2))}),
   ].map(run)
 
   t.deepEqual(
