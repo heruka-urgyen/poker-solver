@@ -181,7 +181,7 @@ const bet = def("bet")({})([Bet, Game, Game])
           pots: pots.pots,
           return: [],
         },
-        nextPlayer,
+        nextPlayer: round.button,
         whoActed: [],
         street: STREETS[STREETS.indexOf(round.street) + 1],
       }
