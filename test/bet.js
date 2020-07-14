@@ -379,7 +379,7 @@ test("4-player: bet - all in - bet - call - call", t => {
     },}
 
   const run = newGame(table3)
-  const [_1, _2, _3, r1, r2, r3, r4, r5] = [
+  const [_1, _2,  _3, r1, r2, r3, r4, r5] = [
     newFirstRound,
     ({table, round}) => ({table, round: {...round, button: 1}}),
     postBlinds,

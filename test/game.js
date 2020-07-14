@@ -59,8 +59,8 @@ test("newRoundExtended", t => {
   t.deepEqual(
     newRoundExtended
       ("1")
-      ({id: "1", maxPlayers: 3, players: [{id: "1"}, {id: "2"}, {id: "3"}]})
-      (0)
+      ({id: "1", maxPlayers: 4, players: [{id: "1"}, {id: "2"}, {id: "3"}, {id: "4"}]})
+      (1)
       (Pair(1)(2))
       ([Pair("2")([newCard("As"), newCard("Kc")])])
       (deck),
@@ -74,13 +74,14 @@ test("newRoundExtended", t => {
       cards: [
         Pair("1")([]),
         Pair("2")([{rank: "A", suit: "s", value: 13}, {rank: "K", suit: "c", value: 12}]),
-        Pair("3")([])],
-      button: 0,
+        Pair("3")([]),
+        Pair("4")([])],
+      button: 1,
       nextPlayer: 0,
       blinds: Pair(1)(2),
       bets: [],
       pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
+      players: ["1", "2", "3", "4"],
       winners: [],
     }
   )
@@ -531,6 +532,11 @@ test("3-players: leavePlayer", t => {
   ].map(run)
 
   t.deepEqual(
+    r1.round.nextPlayer,
+    0
+  )
+
+  t.deepEqual(
     r1.table.players,
     [{id: "1", stack: 0}, {id: "2", stack: 0}],
   )
@@ -594,6 +600,11 @@ test("play round", t => {
     endRound,
     newRound,
   ].map(run)
+
+  t.deepEqual(
+    r1.round.nextPlayer,
+    0
+  )
 
   t.deepEqual(
     r1.round.bets,

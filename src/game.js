@@ -125,7 +125,7 @@ const newRoundExtended = def("newRoundExtended")({})
       (p => S.fromMaybe(S.Pair(p.id)([]))(S.find(c => Pair.fst(c) === p.id)(cards)))
       (table.players),
     button,
-    nextPlayer: button,
+    nextPlayer: table.players.length === 2? button : (button + 3) % table.players.length,
     blinds,
     bets: [],
     pots: {pots: [], return: []},
