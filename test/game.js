@@ -9,6 +9,7 @@ const {
   leavePlayer,
   newRoundExtended,
   newRound,
+  newFirstRound,
   deal,
   computeRoundWinners,
   endRound,
@@ -31,31 +32,27 @@ test("newTable", t => {
 test("sitPlayer at empty table", t => {
   const table = newTable("1")(9)
 
-  const game1 = {table, round: {status: "FINISHED"}}
-  const game2 = sitPlayer({id: "1"})(game1)
+  const game2 = sitPlayer({id: "1"})({table, round: {}})
 
   t.deepEqual(game2.table.players,[{id: "1"}])
-  t.deepEqual(game2.round.players,["1"])
 })
 
 test("sitPlayer at non-empty table", t => {
   const table = {id: "1", maxPlayers: 9, players: [{id: "1"}, {id: "2"}]}
 
-  const game1 = {table, round: {status: "FINISHED"}}
+  const game1 = {table, round: {}}
   const game2 = sitPlayer({id: "3"})(game1)
 
   t.deepEqual(game2.table.players,[{id: "1"}, {id: "2"}, {id: "3"}])
-  t.deepEqual(game2.round.players,["1", "2", "3"])
 })
 
 test("sitPlayer at full table", t => {
   const table = {id: "1", maxPlayers: 2, players: [{id: "1"}, {id: "2"}]}
 
-  const game1 = {table, round: {status: "FINISHED"}}
+  const game1 = {table, round: {}}
   const game2 = sitPlayer({id: "3"})(game1)
 
   t.deepEqual(game2.table.players,[{id: "1"}, {id: "2"}])
-  t.deepEqual(game2.round.players,["1", "2"])
 })
 
 test("newRoundExtended", t => {
@@ -382,9 +379,14 @@ test("end round", t => {
     },
   }
 
-  const run = newGame({table, round})
+  const run = newGame(table)
 
-  const [_, r1] = [s => ({...s, round: computeRoundWinners(s.round)}), endRound].map(run)
+  const [_1, _2, _3, r1] = [
+    newFirstRound,
+    s => ({...s, round: {...s.round, ...round}}),
+    s => ({...s, round: computeRoundWinners(s.round)}),
+    endRound
+  ].map(run)
 
   t.deepEqual(
     r1.table.players,
@@ -403,8 +405,11 @@ test("2-players: leavePlayer", t => {
     bets: [{amount: 20, playerId: "2"}],
   }
 
-  const run = newGame({table, round})
-  const [r1, r2, r3] = [
+  const run = newGame(table)
+
+  const [_1, _2, r1, r2, r3] = [
+    newFirstRound,
+    s => ({...s, round: {...s.round, ...round}}),
     leavePlayer("2"),
     s => ({...s, round: computeRoundWinners(s.round)}),
   ].map(run)
@@ -451,8 +456,10 @@ test("2-players: leavePlayer preflop", t => {
     communityCards: [],
   }
 
-  const run = newGame({table, round})
-  const [r1, r2, r3] = [
+  const run = newGame(table)
+  const [_1, _2, r1, r2, r3] = [
+    newFirstRound,
+    s => ({...s, round: {...s.round, ...round}}),
     leavePlayer("1"),
     s => ({...s, round: computeRoundWinners(s.round)}),
   ].map(run)
@@ -514,8 +521,10 @@ test("3-players: leavePlayer", t => {
     },
   }
 
-  const run = newGame({table, round})
-  const [r1, r2, r3] = [
+  const run = newGame(table)
+  const [_1, _2, r1, r2, r3] = [
+    newFirstRound,
+    s => ({...s, round: {...s.round, ...round}}),
     leavePlayer("3"),
     s => ({...s, round: computeRoundWinners(s.round)}),
     endRound,
@@ -560,11 +569,14 @@ test("3-players: leavePlayer", t => {
 
 test("play round", t => {
   const table = newTable("1")(2)
-  const run = newGame({table, round: {status: "FINISHED"}})
+  const run = newGame(table)
 
-  const [_1, _2, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16] = [
+  const [
+    _1, _2, _3, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16,
+  ] = [
     sitPlayer({id: "1", stack: 100}),
     sitPlayer({id: "2", stack: 100}),
+    newFirstRound,
     postBlinds,
     s => ({...s, round: deal(s.round)}),
     bet({playerId: "1", amount: 1}),

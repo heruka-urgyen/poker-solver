@@ -2,7 +2,7 @@ const test = require("ava")
 const Pair = require("sanctuary-pair")
 
 const {calculatePots, postBlinds, bet, fold} = require("../src/bet")
-const {newGame, newRound} = require("../src/game")
+const {newGame, newFirstRound} = require("../src/game")
 const {newDeck} = require("../src/card")
 const {ROUND_STATUS} = require("../src/types")
 
@@ -26,11 +26,6 @@ const table3 = {
     {id: "4", stack: 65}],}
 
 test("2-player: bet - fold", t => {
-  const initialState = {
-    table: table1,
-    round: {}
-  }
-
   const res1 = {
     players: [{id: "1", stack: 39}, {id: "2", stack: 28}],
     bets: [{playerId: "1", amount: 11}, {playerId: "2", amount: 2}],
@@ -46,8 +41,9 @@ test("2-player: bet - fold", t => {
     },
   }
 
-  const run = newGame(initialState)
-  const [_, r1, r2] = [
+  const run = newGame(table1)
+  const [_1, _2, r1, r2] = [
+    newFirstRound,
     postBlinds,
     bet({playerId: "1", amount: 10}),
     fold("2"),
@@ -58,11 +54,6 @@ test("2-player: bet - fold", t => {
 })
 
 test("2-player: call - check - bet - fold", t => {
-  const initialState = {
-    table: table1,
-    round: {},
-  }
-
   const res1 = {
     players: [{id: "1", stack: 48}, {id: "2", stack: 28}],
     bets: [{playerId: "1", amount: 2}, {playerId: "2", amount: 2}],
@@ -95,8 +86,9 @@ test("2-player: call - check - bet - fold", t => {
     },
   }
 
-  const run = newGame(initialState)
-  const [_, r1, r2, r3, r4] = [
+  const run = newGame(table1)
+  const [_1, _2, r1, r2, r3, r4] = [
+    newFirstRound,
     postBlinds,
     bet({playerId: "1", amount: 1}),
     bet({playerId: "2", amount: 0}),
@@ -110,11 +102,6 @@ test("2-player: call - check - bet - fold", t => {
 })
 
 test("3-player: bet - fold - call", t => {
-  const initialState = {
-    table: table2,
-    round: {button: 1},
-  }
-
   const res1 = {
     players: [{id: "1", stack: 49}, {id: "2", stack: 28}, {id: "3", stack: 60}],
     bets:
@@ -141,9 +128,10 @@ test("3-player: bet - fold - call", t => {
     },
   }
 
-  const run = newGame(initialState)
-  const [_1, _2, r1, r2, r3] = [
-    newRound,
+  const run = newGame(table2)
+  const [_1, _2, _3, r1, r2, r3] = [
+    newFirstRound,
+    ({table, round}) => ({table, round: {...round, button: 2}}),
     postBlinds,
     bet({playerId: "3", amount: 10}),
     fold("1"),
@@ -156,11 +144,6 @@ test("3-player: bet - fold - call", t => {
 })
 
 test("3-player: bet - call - fold", t => {
-  const initialState = {
-    table: table2,
-    round: {button: 1},
-  }
-
   const res1 = {
     players: [{id: "1", stack: 49}, {id: "2", stack: 28}, {id: "3", stack: 60}],
     bets:
@@ -187,9 +170,10 @@ test("3-player: bet - call - fold", t => {
     },
   }
 
-  const run = newGame(initialState)
-  const [_1, _2, r1, r2, r3] = [
-    newRound,
+  const run = newGame(table2)
+  const [_1, _2, _3, r1, r2, r3] = [
+    newFirstRound,
+    ({table, round}) => ({table, round: {...round, button: 2}}),
     postBlinds,
     bet({playerId: "3", amount: 10}),
     bet({playerId: "1", amount: 9}),
@@ -202,19 +186,15 @@ test("3-player: bet - call - fold", t => {
 })
 
 test("2-player: post blinds", t => {
-  const initialState = {
-    table: table1,
-    round: {},
-  }
-
   const res1 = {
     players: [{id: "1", stack: 49}, {id: "2", stack: 28}],
     bets: [{playerId: "1", amount: 1}, {playerId: "2", amount: 2}],
     pots: {pots: [], return: []},
   }
 
-  const run = newGame(initialState)
-  const [r1] = [
+  const run = newGame(table1)
+  const [_, r1] = [
+    newFirstRound,
     postBlinds,
   ].map(run).map(({table: {players}, round: {bets, pots}}) => ({players, bets, pots}))
 
@@ -250,8 +230,10 @@ test("2-player: call - call", t => {
     },
   }
 
-  const run = newGame(initialState)
-  const [r1, r2] = [
+  const run = newGame(initialState.table)
+  const [_1, _2, r1, r2] = [
+    newFirstRound,
+    s => ({...s, round: {...s.round, ...initialState.round}}),
     bet({playerId: "1", amount: 0}),
     bet({playerId: "2", amount: 0}),
   ].map(run).map(({table: {players}, round: {bets, pots}}) => ({players, bets, pots}))
@@ -261,11 +243,6 @@ test("2-player: call - call", t => {
 })
 
 test("2-player: call - check", t => {
-  const initialState = {
-    table: table1,
-    round: {},
-  }
-
   const res1 = {
     players: [{id: "1", stack: 48}, {id: "2", stack: 28}],
     bets: [{playerId: "1", amount: 2}, {playerId: "2", amount: 2}],
@@ -281,8 +258,9 @@ test("2-player: call - check", t => {
     },
   }
 
-  const run = newGame(initialState)
-  const [_, r1, r2] = [
+  const run = newGame(table1)
+  const [_1, _2, r1, r2] = [
+    newFirstRound,
     postBlinds,
     bet({playerId: "1", amount: 1}),
     bet({playerId: "2", amount: 0}),
@@ -293,11 +271,6 @@ test("2-player: call - check", t => {
 })
 
 test("3-player: all in - all in - all in", t => {
-  const initialState = {
-    table: table2,
-    round: {button: 1},
-  }
-
   const res1 = {
     players: [{id: "1", stack: 0}, {id: "2", stack: 28}, {id: "3", stack: 70}],
     status: ROUND_STATUS[0],
@@ -322,9 +295,10 @@ test("3-player: all in - all in - all in", t => {
       return: [],
     },}
 
-  const run = newGame(initialState)
-  const [_1, _2, r1, r2, r3] = [
-    newRound,
+  const run = newGame(table2)
+  const [_1, _2, _3, r1, r2, r3] = [
+    newFirstRound,
+    ({table, round}) => ({table, round: {...round, button: 2}}),
     postBlinds,
     bet({playerId: "1", amount: 49}),
     bet({playerId: "2", amount: 28}),
@@ -338,11 +312,6 @@ test("3-player: all in - all in - all in", t => {
 })
 
 test("4-player: bet - all in - bet - call - call", t => {
-  const initialState = {
-    table: table3,
-    round: {button: 0},
-  }
-
   const res1 = {
     players: [
       {id: "1", stack: 40},
@@ -409,9 +378,10 @@ test("4-player: bet - all in - bet - call - call", t => {
       return: [],
     },}
 
-  const run = newGame(initialState)
-  const [_1, _2, r1, r2, r3, r4, r5] = [
-    newRound,
+  const run = newGame(table3)
+  const [_1, _2, _3, r1, r2, r3, r4, r5] = [
+    newFirstRound,
+    ({table, round}) => ({table, round: {...round, button: 1}}),
     postBlinds,
     bet({playerId: "1", amount: 10}),
     bet({playerId: "2", amount: 30}),

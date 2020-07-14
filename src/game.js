@@ -39,21 +39,23 @@ const updatePlayers = t => p => {
   return newPlayers
 }
 
-//    sitPlayer :: Player -> Game -> Game
-const sitPlayer = def("sitPlayer")({})([Player, Game, Game])
+//    sitPlayer :: Player -> {Table, Round} -> {Table, Round}
+const sitPlayer = def
+  ("sitPlayer")
+  ({})
+  ([
+    Player,
+    $.RecordType({table: Table, round: $.Object}),
+    $.RecordType({table: Table, round: $.Object}),
+  ])
   (player => ({table, round}) => {
     const updatedPlayers = updatePlayers(table)(player)
 
     return {
+      round,
       table: {
         ...table,
         players: updatedPlayers,
-      },
-      round: {
-        ...round,
-        players: round.status === ROUND_STATUS[1]?
-          S.map(p => p.id)(updatedPlayers) :
-          round.players,
       },
     }
   })
@@ -132,15 +134,27 @@ const newRoundExtended = def("newRoundExtended")({})
   }))
 
 //    newRound :: Game -> Game
-const newRound = def("newRound")({})([Game, Game])
+const newRound = ({table, round}) => _newRound({table, round: S.Just(round)})
+
+//    newRound :: Game -> Game
+const newFirstRound = ({table}) => _newRound({table, round: S.Nothing})
+
+//    newRound0 :: {Table, Maybe Round} -> Game
+const _newRound = def
+  ("newRound")
+  ({})
+  ([$.RecordType({table: Table, round: $.Maybe(Round)}), Game])
   (({table, round}) => {
+    const newRoundId = uuid.v4
+    const [button, blinds] = S.maybe([-1, Pair(1)(2)])(r => [r.button, r.blinds])(round)
+
     return {
       table,
       round: newRoundExtended
         (newRoundId())
         (table)
-        ((round.button + 1) % table.players.length)
-        (round.blinds)
+        ((button + 1) % table.players.length)
+        (blinds)
         ([])
         (newDeck("shuffle")),
     }
@@ -253,24 +267,12 @@ const endRound = def("endRound")({})([Game, Game])
     }
   })
 
-
-const newRoundId = uuid.v4
-
-//    newGame :: Game -> Game
-const newGame = def("newGame")({})([Game, $.AnyFunction])
-  (({table, round}) => {
+//    newGame :: Table -> (Game -> Game) -> Game
+const newGame = def("newGame")({})([Table, $.AnyFunction])
+  (table => {
     let _state = {
       table,
-      round: {
-        ...newRoundExtended
-            (newRoundId())
-            (table)
-            (0)
-            (Pair(1)(2))
-            ([])
-            (newDeck("shuffle")),
-        ...round,
-      }
+      round: {},
     }
 
     return f => {
@@ -287,6 +289,7 @@ module.exports = {
   leavePlayer,
   newRoundExtended,
   newRound,
+  newFirstRound,
   deal,
   computeRoundWinners,
   endRound,
