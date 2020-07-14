@@ -18,6 +18,7 @@ const HAND_RANKS =  [
   "Straight Flush",
 ]
 const ROUND_STATUS = ["IN_PROGRESS", "FINISHED", "ALL_IN"]
+const STREET_STATUS = ["IN_PROGRESS", "FINISHED"]
 const STREETS = ["PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN"]
 
 //    Rank :: Type
@@ -62,6 +63,10 @@ const RoundStatus = $.NullaryType("RoundStatus")("")([$.String])
 const Street = $.NullaryType("Street")("")([$.String])
   (x => STREETS.indexOf(x) > -1)
 
+//    StreetStatus :: Type
+const StreetStatus = $.NullaryType("StreetStatus")("")([$.String])
+  (x => STREET_STATUS.indexOf(x) > -1)
+
 //    Bet :: Type
 const Bet = $.NamedRecordType("Bet")("")([])
   ({
@@ -89,6 +94,7 @@ const Round = $.NamedRecordType("Round")("")([])
     id: $.String,
     status: RoundStatus,
     street: Street,
+    streetStatus: StreetStatus,
     tableId: Table.types.id,
     deck: Cards,
     communityCards: Cards,
@@ -126,6 +132,7 @@ module.exports = {
   Round,
   Street,
   STREETS,
+  STREET_STATUS,
   ROUND_STATUS,
   Bet,
   Pots,

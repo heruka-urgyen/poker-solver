@@ -68,6 +68,7 @@ test("newRoundExtended", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[0],
+      streetStatus: "IN_PROGRESS",
       tableId: "1",
       deck: S.filter(c => !(showCard(c) === "As" || showCard(c) === "Kc"))(deck),
       communityCards: [],
@@ -95,6 +96,7 @@ test("deal preflop", t => {
       id: "1",
       status: ROUND_STATUS[0],
       street: STREETS[0],
+      streetStatus: "IN_PROGRESS",
       tableId: "1",
       deck,
       communityCards: [],
@@ -128,7 +130,8 @@ test("deal flop", t => {
     round: {
       id: "1",
       status: ROUND_STATUS[0],
-      street: STREETS[1],
+      street: STREETS[0],
+      streetStatus: "FINISHED",
       tableId: "1",
       deck: deck.slice(6),
       communityCards: [],
@@ -171,7 +174,8 @@ test("deal turn", t => {
     round: {
       id: "1",
       status: ROUND_STATUS[0],
-      street: STREETS[2],
+      street: STREETS[1],
+      streetStatus: "FINISHED",
       tableId: "1",
       deck: deck.slice(9),
       communityCards: [
@@ -219,7 +223,8 @@ test("deal river", t => {
     round: {
       id: "1",
       status: ROUND_STATUS[0],
-      street: STREETS[3],
+      street: STREETS[2],
+      streetStatus: "FINISHED",
       tableId: "1",
       deck: deck.slice(10),
       communityCards: [
@@ -263,11 +268,37 @@ test("deal river", t => {
   )
 })
 
+test("deal more than once per street is noop", t => {
+  const table = newTable("1")(2)
+  const run = newGame(table)
+
+  const [_1, _2, _3, _4, r1, r2, _5, r3, r4] = [
+    sitPlayer({id: "1", stack: 100}),
+    sitPlayer({id: "2", stack: 100}),
+    newFirstRound,
+    postBlinds,
+    deal,
+    deal,
+    ({table, round}) =>
+      ({table, round: {...round, street: STREETS[0], streetStatus: "FINISHED"}}),
+    deal,
+    deal,
+  ].map(run)
+
+  t.deepEqual(r1.round.cards.length, 2)
+  t.deepEqual(r2.round.cards.length, 2)
+  t.deepEqual(r1.round.communityCards.length, 0)
+  t.deepEqual(r2.round.communityCards.length, 0)
+  t.deepEqual(r3.round.communityCards.length, 3)
+  t.deepEqual(r4.round.communityCards.length, 3)
+})
+
 test("computeRoundWinners", t => {
   const result = computeRoundWinners({
     id: "1",
     status: ROUND_STATUS[0],
     street: STREETS[4],
+    streetStatus: "FINISHED",
     tableId: "1",
     deck: deck.slice(11),
     communityCards: [
@@ -662,7 +693,7 @@ test("play round", t => {
   )
 
   t.deepEqual(
-    r10.round.street,
+    r11.round.street,
     STREETS[3]
   )
 
@@ -711,5 +742,15 @@ test("play round", t => {
   t.deepEqual(
     r16.round.blindsPosted,
     false,
+  )
+
+  t.deepEqual(
+    r16.round.street,
+    STREETS[0],
+  )
+
+  t.deepEqual(
+    r16.round.streetStatus,
+    "IN_PROGRESS",
   )
 })

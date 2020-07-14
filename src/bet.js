@@ -10,6 +10,7 @@ const {
   Pots,
   Game,
   STREETS,
+  STREET_STATUS,
   ROUND_STATUS,
 } = require("./types")
 
@@ -183,7 +184,7 @@ const bet = def("bet")({})([Bet, Game, Game])
         },
         nextPlayer: round.button,
         whoActed: [],
-        street: STREETS[STREETS.indexOf(round.street) + 1],
+        streetStatus: STREET_STATUS[1],
       }
 
       return {
@@ -287,6 +288,7 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
           table,
           round: {
             ...round,
+            streetStatus: STREET_STATUS[1],
             players: roundPlayers,
             bets: [],
             pots: {

@@ -15,6 +15,7 @@ const {
   Round,
   Street,
   STREETS,
+  STREET_STATUS,
   ROUND_STATUS,
   Game,
 } = require("./types")
@@ -118,6 +119,7 @@ const newRoundExtended = def("newRoundExtended")({})
     id,
     status: ROUND_STATUS[0],
     street: STREETS[0],
+    streetStatus: STREET_STATUS[0],
     tableId: table.id,
     deck: S.filter(c => !S.elem(c)(S.chain(S.extract)(cards)))(deck),
     communityCards: [],
@@ -164,8 +166,11 @@ const _newRound = def
 //    deal :: Game -> Game
 const deal = def("deal")({})([Game, Game])
   (({table, round}) => {
-    const {street} = round
-    if (street === STREETS[0]) {
+    const {street, streetStatus} = round
+    const streetFinished = streetStatus === STREET_STATUS[1]
+    const streetInProgress = streetStatus === STREET_STATUS[0]
+
+    if (street === STREETS[0] && streetInProgress) {
       const {players, button} = round
       const {deck} = round
       const holeCards = round.cards.length === 0?
@@ -190,7 +195,7 @@ const deal = def("deal")({})([Game, Game])
       }
     }
 
-    if (street === STREETS[1]) {
+    if (street === STREETS[0] && streetFinished) {
       const {deck} = round
 
       return {
@@ -199,21 +204,28 @@ const deal = def("deal")({})([Game, Game])
           ...round,
           deck: deck.slice(3),
           communityCards: deck.slice(0, 3),
+          street: STREETS[1],
+          streetStatus: STREET_STATUS[0],
         },
       }
     }
 
-    if (street === STREETS[2] || street === STREETS[3]) {
+    if (streetFinished && (street === STREETS[1] || street === STREETS[2])) {
       const {deck, communityCards} = round
+
       return {
         table,
         round: {
           ...round,
           deck: deck.slice(1),
           communityCards: S.append(deck[0])(communityCards),
+          street: STREETS[STREETS.indexOf(street) + 1],
+          streetStatus: STREET_STATUS[0],
         },
       }
     }
+
+    return {table, round}
   })
 
 //    computeRoundWinners :: Round -> Round
