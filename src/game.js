@@ -127,6 +127,7 @@ const newRoundExtended = def("newRoundExtended")({})
     button,
     nextPlayer: table.players.length === 2? button : (button + 3) % table.players.length,
     blinds,
+    blindsPosted: false,
     bets: [],
     pots: {pots: [], return: []},
     players: S.map(p => p.id)(table.players),

@@ -193,12 +193,14 @@ test("2-player: post blinds", t => {
   }
 
   const run = newGame(table1)
-  const [_, r1] = [
+  const [_, r1, r2] = [
     newFirstRound,
+    postBlinds,
     postBlinds,
   ].map(run).map(({table: {players}, round: {bets, pots}}) => ({players, bets, pots}))
 
   t.deepEqual(r1, res1)
+  t.deepEqual(r2, res1)
 })
 
 test("2-player: call - call", t => {

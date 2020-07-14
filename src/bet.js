@@ -214,18 +214,20 @@ const updateStack = def("updateStack")({})([$.Array(Bet), Player, Player])
     S.maybe
       (player)
       (bet => ({...player, stack: player.stack - bet.amount}))
-      (S.find(bet => bet.playerId === player.id)(bets))
-  )
-
+      (S.find(bet => bet.playerId === player.id)(bets)))
 
 //    postBlinds :: Game -> Game
 const postBlinds = def("postBlinds")({})([Game, Game])
   (({table, round}) => {
     const {players} = table
-    const {blinds, button} = round
+    const {blinds, button, blindsPosted} = round
     const getPlayersOnBlinds = players.length === 2?
       (_, i) => i === button || i === (button + 1) % players.length :
       (_, i) => i === (button + 1) % players.length || i === (button + 2) % players.length
+
+    if (blindsPosted) {
+      return {table, round}
+    }
 
     const bets = players
       .filter(getPlayersOnBlinds)
@@ -239,6 +241,7 @@ const postBlinds = def("postBlinds")({})([Game, Game])
     const updatedRound = {
       ...round,
       bets,
+      blindsPosted: true,
     }
 
     return {

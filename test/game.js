@@ -79,6 +79,7 @@ test("newRoundExtended", t => {
       button: 1,
       nextPlayer: 0,
       blinds: Pair(1)(2),
+      blindsPosted: false,
       bets: [],
       pots: {pots: [], return: []},
       players: ["1", "2", "3", "4"],
@@ -88,194 +89,165 @@ test("newRoundExtended", t => {
 })
 
 test("deal preflop", t => {
+  const r = deal({
+    id: "1",
+    status: ROUND_STATUS[0],
+    street: STREETS[0],
+    tableId: "1",
+    deck,
+    communityCards: [],
+    cards: [],
+    button: 2,
+    blinds: Pair(1)(2),
+    blindsPosted: true,
+    bets: [],
+    pots: {pots: [], return: []},
+    players: ["1", "2", "3"],
+    winners: [],
+  })
+
   t.deepEqual(
-    deal({
-      id: "1",
-      status: ROUND_STATUS[0],
-      street: STREETS[0],
-      tableId: "1",
-      deck,
-      communityCards: [],
-      cards: [],
-      button: 2,
-      blinds: Pair(1)(2),
-      bets: [],
-      pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
-      winners: [],
-    }),
-    {
-      id: "1",
-      status: ROUND_STATUS[0],
-      street: STREETS[0],
-      tableId: "1",
-      deck: deck.slice(6),
-      communityCards: [],
-      cards: [
+    [r.deck, r.cards],
+    [
+      deck.slice(6),
+      [
         Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
         Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
         Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
       ],
-      button: 2,
-      blinds: Pair(1)(2),
-      bets: [],
-      pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
-      winners: [],
-    }
+    ]
   )
 })
 
 test("deal flop", t => {
+  const r = deal({
+    id: "1",
+    status: ROUND_STATUS[0],
+    street: STREETS[1],
+    tableId: "1",
+    deck: deck.slice(6),
+    communityCards: [],
+    cards: [
+      Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
+      Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
+      Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
+    ],
+    button: 0,
+    blinds: Pair(1)(2),
+    blindsPosted: true,
+    bets: [],
+    pots: {pots: [], return: []},
+    players: ["1", "2", "3"],
+    winners: [],
+  })
+
   t.deepEqual(
-    deal({
-      id: "1",
-      status: ROUND_STATUS[0],
-      street: STREETS[1],
-      tableId: "1",
-      deck: deck.slice(6),
-      communityCards: [],
-      cards: [
-        Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
-        Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
-        Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
-      ],
-      button: 0,
-      blinds: Pair(1)(2),
-      bets: [],
-      pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
-      winners: [],
-    }),
-    {
-      id: "1",
-      status: ROUND_STATUS[0],
-      street: STREETS[1],
-      tableId: "1",
-      deck: deck.slice(9),
-      communityCards: [
+    [r.deck, r.communityCards, r.cards],
+    [
+      deck.slice(9),
+      [
         {rank: "3", suit: "h", value: 2},
         {rank: "3", suit: "s", value: 2},
         {rank: "4", suit: "c", value: 3},
       ],
-      cards: [
+      [
         Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
         Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
         Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
       ],
-      button: 0,
-      blinds: Pair(1)(2),
-      bets: [],
-      pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
-      winners: [],
-    }
+    ],
   )
 })
 
 test("deal turn", t => {
+  const r = deal({
+    id: "1",
+    status: ROUND_STATUS[0],
+    street: STREETS[2],
+    tableId: "1",
+    deck: deck.slice(9),
+    communityCards: [
+      {rank: "3", suit: "h", value: 2},
+      {rank: "3", suit: "s", value: 2},
+      {rank: "4", suit: "c", value: 3},
+    ],
+    cards: [
+      Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
+      Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
+      Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
+    ],
+    button: 0,
+    blinds: Pair(1)(2),
+    blindsPosted: true,
+    bets: [],
+    pots: {pots: [], return: []},
+    players: ["1", "2", "3"],
+    winners: [],
+  })
+
   t.deepEqual(
-    deal({
-      id: "1",
-      status: ROUND_STATUS[0],
-      street: STREETS[2],
-      tableId: "1",
-      deck: deck.slice(9),
-      communityCards: [
-        {rank: "3", suit: "h", value: 2},
-        {rank: "3", suit: "s", value: 2},
-        {rank: "4", suit: "c", value: 3},
-      ],
-      cards: [
-        Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
-        Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
-        Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
-      ],
-      button: 0,
-      blinds: Pair(1)(2),
-      bets: [],
-      pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
-      winners: [],
-    }),
-    {
-      id: "1",
-      status: ROUND_STATUS[0],
-      street: STREETS[2],
-      tableId: "1",
-      deck: deck.slice(10),
-      communityCards: [
+    [r.deck, r.communityCards, r.cards],
+    [
+      deck.slice(10),
+      [
         {rank: "3", suit: "h", value: 2},
         {rank: "3", suit: "s", value: 2},
         {rank: "4", suit: "c", value: 3},
         {rank: "4", suit: "d", value: 3},
       ],
-      cards: [
+      [
         Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
         Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
         Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
       ],
-      button: 0,
-      blinds: Pair(1)(2),
-      bets: [],
-      pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
-      winners: [],
-    }
+    ],
   )
 })
 
 test("deal river", t => {
+  const r = deal({
+    id: "1",
+    status: ROUND_STATUS[0],
+    street: STREETS[3],
+    tableId: "1",
+    deck: deck.slice(10),
+    communityCards: [
+      {rank: "3", suit: "h", value: 2},
+      {rank: "3", suit: "s", value: 2},
+      {rank: "4", suit: "c", value: 3},
+      {rank: "4", suit: "d", value: 3},
+    ],
+    cards: [
+      Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
+      Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
+      Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
+    ],
+    button: 0,
+    blinds: Pair(1)(2),
+    blindsPosted: true,
+    bets: [],
+    pots: {pots: [], return: []},
+    players: ["1", "2", "3"],
+    winners: [],
+  })
+
   t.deepEqual(
-    deal({
-      id: "1",
-      status: ROUND_STATUS[0],
-      street: STREETS[3],
-      tableId: "1",
-      deck: deck.slice(10),
-      communityCards: [
-        {rank: "3", suit: "h", value: 2},
-        {rank: "3", suit: "s", value: 2},
-        {rank: "4", suit: "c", value: 3},
-        {rank: "4", suit: "d", value: 3},
-      ],
-      cards: [
-        Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
-        Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
-        Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
-      ],
-      button: 0,
-      blinds: Pair(1)(2),
-      bets: [],
-      pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
-      winners: [],
-    }),
-    {
-      id: "1",
-      status: ROUND_STATUS[0],
-      street: STREETS[3],
-      tableId: "1",
-      deck: deck.slice(11),
-      communityCards: [
+    [r.deck, r.communityCards, r.cards],
+    [
+      deck.slice(11),
+      [
         {rank: "3", suit: "h", value: 2},
         {rank: "3", suit: "s", value: 2},
         {rank: "4", suit: "c", value: 3},
         {rank: "4", suit: "d", value: 3},
         {rank: "4", suit: "h", value: 3},
       ],
-      cards: [
+      [
         Pair("1")([{rank: "2", suit: "c", value: 1}, {rank: "2", suit: "s", value: 1}]),
         Pair("2")([{rank: "2", suit: "d", value: 1}, {rank: "3", suit: "c", value: 2}]),
         Pair("3")([{rank: "2", suit: "h", value: 1}, {rank: "3", suit: "d", value: 2}]),
       ],
-      button: 0,
-      blinds: Pair(1)(2),
-      bets: [],
-      pots: {pots: [], return: []},
-      players: ["1", "2", "3"],
-      winners: [],
-    }
+    ],
   )
 })
 
@@ -300,6 +272,7 @@ test("computeRoundWinners", t => {
     ],
     button: 0,
     blinds: Pair(1)(2),
+    blindsPosted: true,
     bets: [],
     pots: {pots: [], return: []},
     players: ["1", "2", "3"],
@@ -721,5 +694,10 @@ test("play round", t => {
   t.deepEqual(
     r16.round.button,
     1,
+  )
+
+  t.deepEqual(
+    r16.round.blindsPosted,
+    false,
   )
 })

@@ -94,6 +94,7 @@ const Round = $.NamedRecordType("Round")("")([])
     communityCards: Cards,
     cards: $.Array($.Pair($.String)(Cards)),
     blinds: $.Pair($.PositiveInteger)($.PositiveInteger),
+    blindsPosted: $.Boolean,
     bets: $.Array(Bet),
     pots: Pots,
     button: $.NonNegativeInteger,
