@@ -228,8 +228,13 @@ const deal = def("deal")({})([Game, Game])
     return {table, round}
   })
 
-//    computeRoundWinners :: Round -> Round
-const computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
+const computeRoundWinners = ({round, table}) => ({
+  table,
+  round: _computeRoundWinners(round),
+})
+
+//    _computeRoundWinners :: Round -> Round
+const _computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
   (round => {
     const pots = S.reduce
       (acc => dummyPot => acc.length > 0? acc : [dummyPot])
@@ -314,6 +319,7 @@ module.exports = {
   newFirstRound,
   deal,
   computeRoundWinners,
+  _computeRoundWinners,
   endRound,
   newGame,
 }

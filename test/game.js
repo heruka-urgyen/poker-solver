@@ -11,6 +11,7 @@ const {
   newRound,
   newFirstRound,
   deal,
+  _computeRoundWinners,
   computeRoundWinners,
   endRound,
   newGame,
@@ -294,7 +295,7 @@ test("deal more than once per street is noop", t => {
 })
 
 test("computeRoundWinners", t => {
-  const result = computeRoundWinners({
+  const result = _computeRoundWinners({
     id: "1",
     status: ROUND_STATUS[0],
     street: STREETS[4],
@@ -401,7 +402,7 @@ test("end round", t => {
   const [_1, _2, _3, r1] = [
     newFirstRound,
     s => ({...s, round: {...s.round, ...round}}),
-    s => ({...s, round: computeRoundWinners(s.round)}),
+    computeRoundWinners,
     endRound
   ].map(run)
 
@@ -428,7 +429,7 @@ test("2-players: leavePlayer", t => {
     newFirstRound,
     s => ({...s, round: {...s.round, ...round}}),
     leavePlayer("2"),
-    s => ({...s, round: computeRoundWinners(s.round)}),
+    computeRoundWinners,
   ].map(run)
 
   t.deepEqual(
@@ -478,7 +479,7 @@ test("2-players: leavePlayer preflop", t => {
     newFirstRound,
     s => ({...s, round: {...s.round, ...round}}),
     leavePlayer("1"),
-    s => ({...s, round: computeRoundWinners(s.round)}),
+    computeRoundWinners,
   ].map(run)
 
   t.deepEqual(
@@ -543,7 +544,7 @@ test("3-players: leavePlayer", t => {
     newFirstRound,
     s => ({...s, round: {...s.round, ...round}}),
     leavePlayer("3"),
-    s => ({...s, round: computeRoundWinners(s.round)}),
+    computeRoundWinners,
     endRound,
   ].map(run)
 
@@ -612,7 +613,7 @@ test("play round", t => {
     deal,
     bet({playerId: "1", amount: 88}),
     bet({playerId: "2", amount: 88}),
-    s => ({...s, round: computeRoundWinners(s.round)}),
+    computeRoundWinners,
     endRound,
     newRound,
   ].map(run)
