@@ -161,9 +161,9 @@ const _newRound = def
     }
   })
 
-//    deal :: Round -> Round
-const deal = def("deal")({})([Round, Round])
-  (round => {
+//    deal :: Game -> Game
+const deal = def("deal")({})([Game, Game])
+  (({table, round}) => {
     const {street} = round
     if (street === STREETS[0]) {
       const {players, button} = round
@@ -181,9 +181,12 @@ const deal = def("deal")({})([Round, Round])
         (S.map(c => Pair(holeCards.indexOf(c))(c))(holeCards))
 
       return {
-        ...round,
-        deck: deck.slice(players.length * 2),
-        cards,
+        table,
+        round: {
+          ...round,
+          deck: deck.slice(players.length * 2),
+          cards,
+        },
       }
     }
 
@@ -191,18 +194,24 @@ const deal = def("deal")({})([Round, Round])
       const {deck} = round
 
       return {
-        ...round,
-        deck: deck.slice(3),
-        communityCards: deck.slice(0, 3),
+        table,
+        round: {
+          ...round,
+          deck: deck.slice(3),
+          communityCards: deck.slice(0, 3),
+        },
       }
     }
 
     if (street === STREETS[2] || street === STREETS[3]) {
       const {deck, communityCards} = round
       return {
-        ...round,
-        deck: deck.slice(1),
-        communityCards: S.append(deck[0])(communityCards),
+        table,
+        round: {
+          ...round,
+          deck: deck.slice(1),
+          communityCards: S.append(deck[0])(communityCards),
+        },
       }
     }
   })
