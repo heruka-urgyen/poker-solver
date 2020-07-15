@@ -223,17 +223,18 @@ const postBlinds = def("postBlinds")({})([Game, Game])
   (({table, round}) => {
     const {players} = table
     const {blinds, button, blindsPosted} = round
-    const getPlayersOnBlinds = players.length === 2?
-      (_, i) => i === button || i === (button + 1) % players.length :
-      (_, i) => i === (button + 1) % players.length || i === (button + 2) % players.length
+    const getPlayersOnBlinds = round.players.length === 2?
+      (_, i) => i === button || i === (button + 1) % round.players.length :
+      (_, i) => i === (button + 1) % round.players.length
+        || i === (button + 2) % round.players.length
 
     if (blindsPosted) {
       return {table, round}
     }
 
-    const bets = players
+    const bets = round.players
       .filter(getPlayersOnBlinds)
-      .map((p, i) => ({playerId: p.id, amount: [Pair.fst(blinds), Pair.snd(blinds)][i]}))
+      .map((id, i) => ({playerId: id, amount: [Pair.fst(blinds), Pair.snd(blinds)][i]}))
 
     const updatedTable = {
       ...table,
@@ -283,12 +284,15 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
       }
     } else {
       const bet = round.bets.find(b => b.playerId === id)
+      const nextPlayer = round.players[
+        (round.players.findIndex(id => id === round.nextPlayer) + 1) % round.players.length]
 
       if (roundPlayers.length === round.whoActed.length) {
         return {
           table,
           round: {
             ...round,
+            nextPlayer,
             streetStatus: STREET_STATUS[1],
             players: roundPlayers,
             bets: [],
@@ -304,6 +308,7 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
         table,
         round: {
           ...round,
+          nextPlayer,
           players: roundPlayers,
           bets: round.bets.filter(b => b.playerId !== id),
           pots: {

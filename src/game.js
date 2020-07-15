@@ -303,22 +303,6 @@ const endRound = def("endRound")({})([Game, Game])
     }
   })
 
-//    newGame :: Table -> (Game -> Game) -> Game
-const newGame = def("newGame")({})([Table, $.AnyFunction])
-  (table => {
-    let _state = {
-      table,
-      round: {},
-    }
-
-    return f => {
-      const newState = f(_state)
-      _state = newState
-
-      return _state
-    }
-  })
-
 const stateToActions = state => {
   const {table, round} = state
   const allIn = round.status === ROUND_STATUS[2]
@@ -364,7 +348,11 @@ const stateToActions = state => {
       actions.fold = fold(next)
     }
 
-    if ((isShowdown && !gotWinners) || (allIn && isRiver && streetFinished)) {
+    if (
+      (round.players.length === 1)
+      || (isShowdown && !gotWinners)
+      || (allIn && isRiver && streetFinished)
+    ) {
       actions.getWinners = computeRoundWinners
     }
 
@@ -376,8 +364,8 @@ const stateToActions = state => {
   return actions
 }
 
-//    newGame2 :: Table -> (Game -> Game) -> Game
-  const newGame2 = table => {
+//      newGame :: Table -> (Game -> Game) -> Game
+  const newGame = table => {
     const state = {
       table,
       round: {status: ROUND_STATUS[1]},
@@ -408,5 +396,4 @@ module.exports = {
   _computeRoundWinners,
   endRound,
   newGame,
-  newGame2,
 }
