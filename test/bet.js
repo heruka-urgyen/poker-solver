@@ -36,7 +36,7 @@ test("2-player: bet - fold", t => {
     players: [{id: "1", stack: 39}, {id: "2", stack: 28}],
     bets: [],
     pots: {
-      pots: [{amount: 13, players: ["1", "2"]}],
+      pots: [{amount: 13, players: ["1"]}],
       return: [],
     },
   }
@@ -84,7 +84,7 @@ test("2-player: call - check - bet - fold", t => {
     players: [{id: "1", stack: 38}, {id: "2", stack: 28}],
     bets: [],
     pots: {
-      pots: [{amount: 14, players: ["1", "2"]}],
+      pots: [{amount: 14, players: ["1"]}],
       return: [],
     },
   }

@@ -419,7 +419,7 @@ test("2-players: leavePlayer", t => {
     r[7].round.pots,
     {
       pots: [
-        {players: ["1", "2"], amount: 22},
+        {players: ["1"], amount: 22},
       ],
       return: [],
     },
@@ -448,7 +448,7 @@ test("2-players: leavePlayer preflop", t => {
     r[3].round.pots,
     {
       pots: [
-        {players: ["1", "2"], amount: 3},
+        {players: ["2"], amount: 3},
       ],
       return: [],
     },
@@ -457,7 +457,7 @@ test("2-players: leavePlayer preflop", t => {
   t.deepEqual(r[4].round.winners.map(w => w.playerId), ["2"])
 })
 
-test("play round new api", t => {
+test("play round 2 players", t => {
   const table = newTable("1")(3)
 
   const r = newGame(table)
@@ -512,3 +512,35 @@ test("play round new api", t => {
   t.deepEqual(r[19].round.streetStatus, "IN_PROGRESS")
 })
 
+test("play round 3 players", t => {
+  const table = newTable("1")(3)
+
+  const r = newGame(table)
+    .update(actions => actions.sitPlayer({id: "1", stack: 100}))
+    .update(actions => actions.sitPlayer({id: "2", stack: 100}))
+    .update(actions => actions.sitPlayer({id: "3", stack: 100}))
+    .update(actions => actions.newRound)
+    .update(actions => actions.postBlinds)
+    .update(actions => actions.deal)
+    .update(actions => actions.bet(10))
+    .update(actions => actions.bet(9))
+    .update(actions => actions.bet(8))
+    .update(actions => actions.deal)
+    .update(actions => actions.bet(10))
+    .update(actions => actions.fold)
+    .update(actions => actions.bet(90))
+    .update(actions => actions.bet(80))
+    .update(actions => actions.deal)
+    .update(actions => actions.deal)
+    .update(actions => actions.getWinners)
+    .update(actions => actions.endRound)
+    .getAll()
+
+  t.deepEqual(r[10].round.pots, {pots: [{amount: 30, players: ["2", "3", "1"]}], return: []})
+  t.deepEqual(r[12].round.pots, {pots: [{amount: 30, players: ["1", "3"]}], return: []})
+  t.deepEqual(r[12].round.players.length, 2)
+  t.deepEqual(r[14].round.status, ROUND_STATUS[2])
+  t.deepEqual(r[17].round.pots, {pots: [{amount: 210, players: ["1", "3"]}], return: []})
+  t.regex(r[17].round.winners.length.toString(), /1|2/)
+  t.regex(S.map(p => p.stack)(r[18].table.players).toString(), /105,90,105|210,90,0|0,90,210/)
+})
