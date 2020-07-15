@@ -15,6 +15,7 @@ const {
   computeRoundWinners,
   endRound,
   newGame,
+  newGame2,
 } = require ("../src/game")
 
 const {STREETS, ROUND_STATUS} = require("../src/types")
@@ -755,3 +756,59 @@ test("play round", t => {
     "IN_PROGRESS",
   )
 })
+
+test("play round new api", t => {
+  const table = newTable("1")(3)
+
+  const r = newGame2(table)
+    .update(actions => actions.sitPlayer({id: "1", stack: 100}))
+    .update(actions => actions.sitPlayer({id: "2", stack: 100}))
+    .update(actions => actions.newRound)
+    .update(actions => actions.postBlinds)
+    .update(actions => actions.deal)
+    .update(actions => actions.bet({playerId: "1", amount: 1}))
+    .update(actions => actions.bet({playerId: "2", amount: 0}))
+    .update(actions => actions.deal)
+    .update(actions => actions.bet({playerId: "1", amount: 10}))
+    .update(actions => actions.bet({playerId: "2", amount: 10}))
+    .update(actions => actions.deal)
+    .update(actions => actions.bet({playerId: "1", amount: 0}))
+    .update(actions => actions.bet({playerId: "2", amount: 0}))
+    .update(actions => actions.deal)
+    .update(actions => actions.bet({playerId: "1", amount: 88}))
+    .update(actions => actions.bet({playerId: "2", amount: 88}))
+    .update(actions => actions.getWinners)
+    .update(actions => actions.endRound)
+    .update(actions => actions.newRound)
+    .getAll()
+
+  t.deepEqual(r[3].round.nextPlayer, 0)
+  t.deepEqual(r[4].round.bets, [{playerId: "1", amount: 1}, {playerId: "2", amount: 2}])
+  t.deepEqual(r[4].round.street, STREETS[0])
+  t.deepEqual(S.chain(S.extract)(r[5].round.cards).length, 4)
+  t.deepEqual(r[6].round.bets, [{playerId: "1", amount: 2}, {playerId: "2", amount: 2}])
+  t.deepEqual(r[7].round.pots, {pots: [{amount: 4, players: ["1", "2"]}], return: []})
+  t.deepEqual(r[8].round.communityCards.length, 3)
+  t.deepEqual(r[8].round.street, STREETS[1])
+  t.deepEqual(r[9].round.bets, [{playerId: "1", amount: 10}])
+  t.deepEqual(r[9].table.players, [{id: "1", stack: 88}, {id: "2", stack: 98}])
+  t.deepEqual(r[10].round.pots, {pots: [{amount: 24, players: ["1", "2"]}], return: []})
+  t.deepEqual(r[11].round.communityCards.length, 4)
+  t.deepEqual(r[11].round.street, STREETS[2])
+  t.deepEqual(r[12].table.players, [{id: "1", stack: 88}, {id: "2", stack: 88}])
+  t.deepEqual(r[13].round.pots, {pots: [{amount: 24, players: ["1", "2"]}], return: []})
+  t.deepEqual(r[14].round.street, STREETS[3])
+  t.deepEqual(r[14].round.communityCards.length, 5)
+  t.deepEqual(r[15].table.players, [{id: "1", stack: 0}, {id: "2", stack: 88}])
+  t.deepEqual(r[16].round.pots, {pots: [{amount: 200, players: ["1", "2"]}], return: []})
+  t.true(r[17].round.winners.length > 0)
+  t.deepEqual(r[18].round.status, ROUND_STATUS[1])
+  t.regex(S.map(p => p.stack)(r[18].table.players).toString(), /100,100|200,0|0,200/)
+  t.deepEqual(r[19].table, r[18].table)
+  t.deepEqual(r[19].round.tableId, r[19].table.id)
+  t.deepEqual(r[19].round.button, 1)
+  t.deepEqual(r[19].round.blindsPosted, false)
+  t.deepEqual(r[19].round.street, STREETS[0])
+  t.deepEqual(r[19].round.streetStatus, "IN_PROGRESS")
+})
+

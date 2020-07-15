@@ -185,6 +185,7 @@ const bet = def("bet")({})([Bet, Game, Game])
         nextPlayer: round.button,
         whoActed: [],
         streetStatus: STREET_STATUS[1],
+        street: round.street === STREETS[3]? STREETS[4] : round.street
       }
 
       return {

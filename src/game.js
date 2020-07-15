@@ -21,6 +21,7 @@ const {
 } = require("./types")
 const {newCard, newDeck} = require("./card")
 const {selectWinningHands} = require("./hand")
+const {postBlinds, fold, bet} = require("./bet")
 
 //    newTable :: Int -> Int -> Table
 const newTable = def("newTable")({})([Table.types.id, Table.types.maxPlayers, Table])
@@ -169,6 +170,7 @@ const deal = def("deal")({})([Game, Game])
     const {street, streetStatus} = round
     const streetFinished = streetStatus === STREET_STATUS[1]
     const streetInProgress = streetStatus === STREET_STATUS[0]
+    const allIn = round.status === ROUND_STATUS[2]
 
     if (street === STREETS[0] && streetInProgress) {
       const {players, button} = round
@@ -205,7 +207,7 @@ const deal = def("deal")({})([Game, Game])
           deck: deck.slice(3),
           communityCards: deck.slice(0, 3),
           street: STREETS[1],
-          streetStatus: STREET_STATUS[0],
+          streetStatus: allIn? STREET_STATUS[1] : STREET_STATUS[0],
         },
       }
     }
@@ -220,7 +222,7 @@ const deal = def("deal")({})([Game, Game])
           deck: deck.slice(1),
           communityCards: S.append(deck[0])(communityCards),
           street: STREETS[STREETS.indexOf(street) + 1],
-          streetStatus: STREET_STATUS[0],
+          streetStatus: allIn? STREET_STATUS[1] : STREET_STATUS[0],
         },
       }
     }
@@ -254,6 +256,7 @@ const _computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
 
     return {
       ...round,
+      street: STREETS[4],
       winners,
     }
   })
@@ -310,6 +313,82 @@ const newGame = def("newGame")({})([Table, $.AnyFunction])
     }
   })
 
+const stateToActions = state => {
+  const {table, round} = state
+  const allIn = round.status === ROUND_STATUS[2]
+  const roundInProgress = round.status === ROUND_STATUS[0] || allIn
+  const roundFinished = round.status === ROUND_STATUS[1]
+  const streetFinished = round.streetStatus === STREET_STATUS[1]
+  const streetInProgress = round.streetStatus === STREET_STATUS[0]
+  const isRiver = round.street === STREETS[3]
+  const isShowdown = round.street === STREETS[4]
+  const gotWinners = round.winners && round.winners.length > 0
+
+  const canDeal = !isShowdown
+    && (round.street === STREETS[0] && round.blindsPosted && round.deck.length === 52
+    || allIn
+    || streetFinished)
+
+  let actions = {leave: leavePlayer}
+
+  if (table.players.length < table.maxPlayers) {
+    actions.sitPlayer = sitPlayer
+  }
+
+  if (table.players.length >= 2 && roundFinished) {
+    if (round.id) {
+      actions.newRound = newRound
+    } else {
+      actions.newRound = newFirstRound
+    }
+  }
+
+  if (roundInProgress) {
+    if (!round.blindsPosted) {
+      actions.postBlinds = postBlinds
+    }
+
+    if (canDeal) {
+      actions.deal = deal
+    }
+
+    if (streetInProgress && round.blindsPosted && !canDeal && !allIn) {
+      actions.bet = bet
+      actions.fold = fold
+    }
+
+    if ((isShowdown && !gotWinners) || (allIn && isRiver && streetFinished)) {
+      actions.getWinners = computeRoundWinners
+    }
+
+    if (gotWinners) {
+      actions.endRound = endRound
+    }
+  }
+
+  return actions
+}
+
+//    newGame2 :: Table -> (Game -> Game) -> Game
+  const newGame2 = table => {
+    const state = {
+      table,
+      round: {status: ROUND_STATUS[1]},
+    }
+
+    const get = states => () => states[states.length - 1]
+    const getAll = states => () => states
+
+    const update = states => f => {
+      const state = states[states.length - 1]
+      const states2 = states.concat(f(stateToActions(state))(state))
+
+      return {update: update(states2), getAll: getAll(states2), get: get(states2)}
+    }
+
+    return {update: update([state]), getAll: getAll([state]), get: get([state])}
+  }
+
 module.exports = {
   newTable,
   sitPlayer,
@@ -322,4 +401,5 @@ module.exports = {
   _computeRoundWinners,
   endRound,
   newGame,
+  newGame2,
 }
