@@ -275,7 +275,7 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
         },
       }
     } else {
-      const bet = round.bets.find(b => b.playerId === id)
+      const bet = S.fromMaybe({amount: 0})(S.find(b => b.playerId === id)(round.bets))
       const nextPlayer = round.players[
         (round.players.findIndex(id => id === round.nextPlayer) + 1) % round.players.length]
 
@@ -304,7 +304,7 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
           players: roundPlayers,
           bets: round.bets.filter(b => b.playerId !== id),
           pots: {
-            pots: [{players: roundPlayers, amount: bet.amount}],
+            pots: bet.amount > 0? [{players: roundPlayers, amount: bet.amount}] : [],
             return: [],
           },
         },
