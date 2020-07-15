@@ -414,12 +414,12 @@ test("2-players: leavePlayer", t => {
 
   t.deepEqual(r[7].table.players, [{id: "1", stack: 3}])
   t.deepEqual(r[7].round.players, ["1"])
-  t.deepEqual(r[7].round.bets, [{playerId: "1", amount: 2}])
+  t.deepEqual(r[7].round.bets, [])
   t.deepEqual(
     r[7].round.pots,
     {
       pots: [
-        {players: ["1"], amount: 20},
+        {players: ["1", "2"], amount: 22},
       ],
       return: [],
     },
@@ -442,13 +442,13 @@ test("2-players: leavePlayer preflop", t => {
 
   t.deepEqual(r[3].table.players, [{id: "2", stack: 18}])
   t.deepEqual(r[3].round.players, ["2"])
-  t.deepEqual(r[3].round.bets, [{playerId: "2", amount: 2}])
+  t.deepEqual(r[3].round.bets, [])
 
   t.deepEqual(
     r[3].round.pots,
     {
       pots: [
-        {players: ["2"], amount: 1},
+        {players: ["1", "2"], amount: 3},
       ],
       return: [],
     },

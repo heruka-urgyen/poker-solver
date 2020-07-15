@@ -62,45 +62,18 @@ const sitPlayer = def
     }
   })
 
-//    leavePlayer :: Player -> Game -> Game
-const leavePlayer = def("leavePlayer")({})([Player.types.id, Game, Game])
-  (playerId => ({table, round}) => {
-    const updatedPlayers = S.filter(p => p.id !== playerId)(table.players)
-    const maybeBet = S.find(b => b.playerId === playerId)(round.bets)
-    const updatedBets = S.filter(b => b.playerId !== playerId)(round.bets)
-    const updatedPots = round.pots.pots.length > 0? S.map
-      (pots => {
-        return S.map(({players, amount}) => {
-          const updatedPotPlayers =  S.filter(id => id !== playerId)(players)
+//    leaveTable :: Player -> Game -> Game
+const leaveTable = def("leaveTable")({})([Player.types.id, Game, Game])
+  (playerId => game => {
+    const {round, table} = fold(playerId)(game)
 
-          if (players.length === round.players.length) {
-            return {
-              players: updatedPotPlayers,
-              amount: S.maybe(amount)(b => amount + b.amount)(maybeBet),
-            }
-          }
-
-          return {players: updatedPotPlayers, amount}
-        })(pots)
-      })(round.pots) :
-      {
-        return: [],
-        pots: [{
-          players: S.map(p => p.id)(updatedPlayers),
-          amount: S.maybe(0)(b => b.amount)(maybeBet)}]}
-
-      return {
-        table: {
-          ...table,
-          players: updatedPlayers,
-        },
-        round: {
-          ...round,
-          players: S.map(p => p.id)(updatedPlayers),
-          bets: updatedBets,
-          pots: updatedPots,
-        },
-      }
+    return {
+      round,
+      table: {
+        ...table,
+        players: S.filter(p => p.id !== playerId)(table.players),
+      },
+    }
   })
 
 //    Blinds = Pair Positive Int, Positive Int
@@ -249,6 +222,18 @@ const _computeRoundWinners = def("computeRoundWinners")({})([Round, Round])
       (round.pots.pots)
       ([{amount: 0, players: round.players}])
 
+    if (round.players.length === 1) {
+      return {
+        ...round,
+        street: STREETS[4],
+        winners: [{
+          playerId: round.players[0],
+          amount: pots[0].amount,
+          hand: S.Nothing,
+        }],
+      }
+    }
+
     const winners = S.chain
       (([pot, cards]) => {
         const winners =
@@ -319,7 +304,7 @@ const stateToActions = state => {
     || allIn
     || streetFinished)
 
-  let actions = {leave: leavePlayer}
+  let actions = {leave: leaveTable}
 
   if (table.players.length < table.maxPlayers) {
     actions.sitPlayer = sitPlayer
@@ -387,7 +372,7 @@ const stateToActions = state => {
 module.exports = {
   newTable,
   sitPlayer,
-  leavePlayer,
+  leaveTable,
   newRoundExtended,
   newRound,
   newFirstRound,
