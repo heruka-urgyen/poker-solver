@@ -80,7 +80,8 @@ test("newRoundExtended", t => {
         Pair("3")([]),
         Pair("4")([])],
       button: 1,
-      nextPlayer: 0,
+      utg: "1",
+      nextPlayer: "1",
       blinds: Pair(1)(2),
       blindsPosted: false,
       bets: [],
@@ -550,8 +551,8 @@ test("3-players: leavePlayer", t => {
   ].map(run)
 
   t.deepEqual(
-    r1.round.nextPlayer,
-    0
+    r1.round.utg,
+    "1"
   )
 
   t.deepEqual(
@@ -620,8 +621,8 @@ test("play round", t => {
   ].map(run)
 
   t.deepEqual(
-    r1.round.nextPlayer,
-    0
+    r1.round.utg,
+    "1"
   )
 
   t.deepEqual(
@@ -766,23 +767,23 @@ test("play round new api", t => {
     .update(actions => actions.newRound)
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
-    .update(actions => actions.bet({playerId: "1", amount: 1}))
-    .update(actions => actions.bet({playerId: "2", amount: 0}))
+    .update(actions => actions.bet(1))
+    .update(actions => actions.bet(0))
     .update(actions => actions.deal)
-    .update(actions => actions.bet({playerId: "1", amount: 10}))
-    .update(actions => actions.bet({playerId: "2", amount: 10}))
+    .update(actions => actions.bet(10))
+    .update(actions => actions.bet(10))
     .update(actions => actions.deal)
-    .update(actions => actions.bet({playerId: "1", amount: 0}))
-    .update(actions => actions.bet({playerId: "2", amount: 0}))
+    .update(actions => actions.bet(0))
+    .update(actions => actions.bet(0))
     .update(actions => actions.deal)
-    .update(actions => actions.bet({playerId: "1", amount: 88}))
-    .update(actions => actions.bet({playerId: "2", amount: 88}))
+    .update(actions => actions.bet(88))
+    .update(actions => actions.bet(88))
     .update(actions => actions.getWinners)
     .update(actions => actions.endRound)
     .update(actions => actions.newRound)
     .getAll()
 
-  t.deepEqual(r[3].round.nextPlayer, 0)
+  t.deepEqual(r[3].round.utg, "1")
   t.deepEqual(r[4].round.bets, [{playerId: "1", amount: 1}, {playerId: "2", amount: 2}])
   t.deepEqual(r[4].round.street, STREETS[0])
   t.deepEqual(S.chain(S.extract)(r[5].round.cards).length, 4)

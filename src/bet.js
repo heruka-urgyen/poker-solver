@@ -133,8 +133,8 @@ const bet = def("bet")({})([Bet, Game, Game])
 
     const whoActed = updateWhoActed(updatedPlayers)(updatedBets)(round)
 
-    const nextPlayer = (
-      players.findIndex(id => id === whoActed[whoActed.length - 1]) + 1) % players.length
+    const nextPlayer = players[(
+      players.findIndex(id => id === whoActed[whoActed.length - 1]) + 1) % players.length]
 
     const playersAllIn = S.filter(p => p.stack === 0)(updatedPlayers)
     const playersNotAllIn = S.filter(p => p.stack !== 0)(updatedPlayers)
@@ -182,7 +182,7 @@ const bet = def("bet")({})([Bet, Game, Game])
           pots: pots.pots,
           return: [],
         },
-        nextPlayer: round.button,
+        nextPlayer: round.utg,
         whoActed: [],
         streetStatus: STREET_STATUS[1],
         street: round.street === STREETS[3]? STREETS[4] : round.street

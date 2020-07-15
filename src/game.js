@@ -116,26 +116,32 @@ const newRoundExtended = def("newRoundExtended")({})
     Cards,
     Round,
   ])
-  (id => table => button => blinds => cards => deck => ({
-    id,
-    status: ROUND_STATUS[0],
-    street: STREETS[0],
-    streetStatus: STREET_STATUS[0],
-    tableId: table.id,
-    deck: S.filter(c => !S.elem(c)(S.chain(S.extract)(cards)))(deck),
-    communityCards: [],
-    cards: S.map
-      (p => S.fromMaybe(S.Pair(p.id)([]))(S.find(c => Pair.fst(c) === p.id)(cards)))
-      (table.players),
-    button,
-    nextPlayer: table.players.length === 2? button : (button + 3) % table.players.length,
-    blinds,
-    blindsPosted: false,
-    bets: [],
-    pots: {pots: [], return: []},
-    players: S.map(p => p.id)(table.players),
-    winners: [],
-  }))
+  (id => table => button => blinds => cards => deck => {
+    const players = S.map(p => p.id)(table.players)
+    const utg = players[players.length === 2? button : (button + 3) % players.length]
+
+    return {
+      id,
+      status: ROUND_STATUS[0],
+      street: STREETS[0],
+      streetStatus: STREET_STATUS[0],
+      tableId: table.id,
+      deck: S.filter(c => !S.elem(c)(S.chain(S.extract)(cards)))(deck),
+      communityCards: [],
+      cards: S.map
+        (p => S.fromMaybe(S.Pair(p.id)([]))(S.find(c => Pair.fst(c) === p.id)(cards)))
+        (table.players),
+      button,
+      utg,
+      nextPlayer: utg,
+      blinds,
+      blindsPosted: false,
+      bets: [],
+      pots: {pots: [], return: []},
+      players,
+      winners: [],
+    }
+  })
 
 //    newRound :: Game -> Game
 const newRound = ({table, round}) => _newRound({table, round: S.Just(round)})
@@ -353,8 +359,9 @@ const stateToActions = state => {
     }
 
     if (streetInProgress && round.blindsPosted && !canDeal && !allIn) {
-      actions.bet = bet
-      actions.fold = fold
+      const next = round.nextPlayer
+      actions.bet = amount => bet({playerId: next, amount})
+      actions.fold = fold(next)
     }
 
     if ((isShowdown && !gotWinners) || (allIn && isRiver && streetFinished)) {
