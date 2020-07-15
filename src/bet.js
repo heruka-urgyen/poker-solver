@@ -151,6 +151,7 @@ const bet = def("bet")({})([Bet, Game, Game])
     if (endOfStreet) {
       const allIn = everyoneAllIn || someAllIn && updatedPlayers.length === 2
       const pots = combinePots(round.pots)(calculatePots(updatedBets))
+
       const players = S.map(p => {
         const isReturnPlayer = S.maybe
           (false)
@@ -269,7 +270,7 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
           players: roundPlayers,
           bets: [],
           pots: {
-            pots: [{players: round.players, amount: pot}],
+            pots: [{players: roundPlayers, amount: pot}],
             return: [],
           },
         },
@@ -278,6 +279,10 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
       const bet = S.fromMaybe({amount: 0})(S.find(b => b.playerId === id)(round.bets))
       const nextPlayer = round.players[
         (round.players.findIndex(id => id === round.nextPlayer) + 1) % round.players.length]
+      const updatedPots = {
+        pots: round.pots.pots.map(p => ({...p, players: roundPlayers})),
+        return: round.pots.return,
+      }
 
       if (roundPlayers.length === round.whoActed.length) {
         return {
@@ -303,10 +308,11 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
           nextPlayer,
           players: roundPlayers,
           bets: round.bets.filter(b => b.playerId !== id),
-          pots: {
-            pots: bet.amount > 0? [{players: roundPlayers, amount: bet.amount}] : [],
-            return: [],
-          },
+          pots: bet.amount > 0?
+            combinePots
+              ({pots: [{players: roundPlayers, amount: bet.amount}], return: []})
+              (updatedPots) :
+            updatedPots,
         },
       }
     }
