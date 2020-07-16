@@ -9,6 +9,8 @@ const {
   Player,
   Pots,
   Game,
+  Table,
+  Round,
   STREETS,
   STREET_STATUS,
   ROUND_STATUS,
@@ -81,25 +83,33 @@ const calculatePots = def("calculatePots")({})([$.Array(Bet), Pots])
         (bets))))
 
 
-const getNextPlayer = ({round, table, allIn}) => {
-  const ps = table.players.filter(p => round.players.indexOf(p.id) > -1)
+//    getNextPlayer :: {Table, Round, Boolean} -> (Player.id -> Player.id)
+const getNextPlayer = def
+  ("getNextPlayer")
+  ({})
+  ([
+    $.RecordType({table: Table, round: Round, allIn: $.Boolean}),
+    $.Fn(Player.types.id)(Player.types.id)
+  ])
+  (({round, table, allIn}) => {
+    const ps = table.players.filter(p => round.players.indexOf(p.id) > -1)
 
-  const inner = pid => {
-    const pi = ps.findIndex(p => p.id === pid)
+    const inner = pid => {
+      const pi = ps.findIndex(p => p.id === pid)
 
-    if (allIn) {
-      return round.utg
+      if (allIn) {
+        return round.utg
+      }
+
+      if (ps[pi].stack > 0) {
+        return ps[pi].id
+      }
+
+      return inner(ps[(pi + 1) % ps.length].id)
     }
 
-    if (ps[pi].stack > 0) {
-      return ps[pi].id
-    }
-
-    return inner(ps[(pi + 1) % ps.length].id)
-  }
-
-  return inner
-}
+    return inner
+  })
 
 //    bet :: Bet -> Game -> Game
 const bet = def("bet")({})([Bet, Game, Game])
