@@ -45,6 +45,215 @@ const round = {
   winners: [],
 }
 
+test("2-player: SB bet", t => {
+  const round1 = {...round, bets: [{playerId: "1", amount: 1}, {playerId: "2", amount: 2}]}
+  const r = bet({playerId: "1", amount: 9})({table: table1, round: round1})
+
+  t.deepEqual(r.round.nextPlayer, "2")
+  t.deepEqual(r.round.whoActed, ["1"])
+  t.deepEqual(r.round.bets, [{playerId: "1", amount: 10}, {playerId: "2", amount: 2}])
+  t.deepEqual(r.round.pots, {pots: [], return: []})
+})
+
+test("2-player: BB bet", t => {
+  const round1 = {
+      ...round,
+      whoActed: ["1"],
+      bets: [{playerId: "1", amount: 2}, {playerId: "2", amount: 2}]}
+  const r = bet({playerId: "2", amount: 8})({table: table1, round: round1})
+
+  t.deepEqual(r.round.nextPlayer, "1")
+  t.deepEqual(r.round.whoActed, ["2"])
+  t.deepEqual(r.round.bets, [{playerId: "1", amount: 2}, {playerId: "2", amount: 10}])
+  t.deepEqual(r.round.pots, {pots: [], return: []})
+})
+
+test("2-player: BB call", t => {
+  const round1 = {
+    ...round,
+    whoActed: ["1"],
+    bets: [{playerId: "1", amount: 2}, {playerId: "2", amount: 2}]}
+  const r = bet({playerId: "2", amount: 0})({table: table1, round: round1})
+
+  t.deepEqual(r.round.nextPlayer, "1")
+  t.deepEqual(r.round.whoActed, [])
+  t.deepEqual(r.round.bets, [])
+  t.deepEqual(r.round.pots, {pots: [{amount: 4, players: ["1", "2"]}], return: []})
+})
+
+test("3-player: UTG bet", t => {
+  const round1 = {
+    ...round,
+    players: ["1", "2", "3"],
+    bets: [{playerId: "2", amount: 1}, {playerId: "3", amount: 2}]}
+  const r = bet({playerId: "1", amount: 10})({table: table2, round: round1})
+
+  t.deepEqual(r.round.nextPlayer, "2")
+  t.deepEqual(r.round.whoActed, ["1"])
+  t.deepEqual(r.round.pots, {pots: [], return: []})
+  t.deepEqual(
+    r.round.bets,
+    [{playerId: "2", amount: 1}, {playerId: "3", amount: 2}, {playerId: "1", amount: 10}])
+})
+
+test("3-player: SB call", t => {
+  const round1 = {
+    ...round,
+    players: ["1", "2", "3"],
+    whoActed: ["1"],
+    bets:
+    [{playerId: "2", amount: 1}, {playerId: "3", amount: 2}, {playerId: "1", amount: 10}]}
+  const r = bet({playerId: "2", amount: 9})({table: table2, round: round1})
+
+  t.deepEqual(r.round.nextPlayer, "3")
+  t.deepEqual(r.round.whoActed, ["1", "2"])
+  t.deepEqual(r.round.pots, {pots: [], return: []})
+  t.deepEqual(
+    r.round.bets,
+    [{playerId: "2", amount: 10}, {playerId: "3", amount: 2}, {playerId: "1", amount: 10}])
+})
+
+test("3-player: BB call", t => {
+  const round1 = {
+    ...round,
+    players: ["1", "2", "3"],
+    whoActed: ["1", "2"],
+    bets:
+    [{playerId: "2", amount: 10}, {playerId: "3", amount: 2}, {playerId: "1", amount: 10}]}
+  const r = bet({playerId: "3", amount: 8})({table: table2, round: round1})
+
+  t.deepEqual(r.round.nextPlayer, "1")
+  t.deepEqual(r.round.whoActed, [])
+  t.deepEqual(r.round.pots, {pots: [{amount: 30, players: ["2", "3", "1"]}], return: []})
+  t.deepEqual(r.round.bets, [])
+})
+
+test("4-player: UTG bet", t => {
+  const round1 = {
+    ...round,
+      utg: "4",
+    players: ["1", "2", "3", "4"],
+    bets: [{playerId: "2", amount: 1}, {playerId: "3", amount: 2}]}
+  const r = bet({playerId: "4", amount: 65})({table: table3, round: round1})
+
+  t.deepEqual(r.round.nextPlayer, "1")
+  t.deepEqual(r.round.whoActed, ["4"])
+  t.deepEqual(r.round.pots, {pots: [], return: []})
+  t.deepEqual(
+    r.round.bets,
+    [{playerId: "2", amount: 1}, {playerId: "3", amount: 2}, {playerId: "4", amount: 65}])
+})
+
+test("4-player: BUTTON bet", t => {
+  const table = {
+    ...table3,
+    players: [
+      {id: "1", stack: 50},
+      {id: "2", stack: 30},
+      {id: "3", stack: 68},
+      {id: "4", stack: 0}]
+  }
+
+  const round1 = {
+    ...round,
+      utg: "4",
+    whoActed: ["4"],
+    players: ["1", "2", "3", "4"],
+    bets: [
+      {playerId: "2", amount: 1},
+      {playerId: "3", amount: 2},
+      {playerId: "4", amount: 65}]}
+
+  const r = bet({playerId: "1", amount: 50})({table, round: round1})
+
+  t.deepEqual(r.round.nextPlayer, "2")
+  t.deepEqual(r.round.whoActed, ["4", "1"])
+  t.deepEqual(r.round.pots, {pots: [], return: []})
+  t.deepEqual(
+    r.round.bets,
+    [
+      {playerId: "2", amount: 1},
+      {playerId: "3", amount: 2},
+      {playerId: "4", amount: 65},
+      {playerId: "1", amount: 50}])
+})
+
+test("4-player: SB bet", t => {
+  const table = {
+    ...table3,
+    players: [
+      {id: "1", stack: 0},
+      {id: "2", stack: 30},
+      {id: "3", stack: 68},
+      {id: "4", stack: 0}]
+  }
+
+  const round1 = {
+    ...round,
+    whoActed: ["4", "1"],
+    players: ["1", "2", "3", "4"],
+    bets: [
+      {playerId: "2", amount: 1},
+      {playerId: "3", amount: 2},
+      {playerId: "4", amount: 65},
+      {playerId: "1", amount: 50}]}
+
+  const r = bet({playerId: "2", amount: 29})({table, round: round1})
+
+  t.deepEqual(r.round.nextPlayer, "3")
+  t.deepEqual(r.round.whoActed, ["4", "1", "2"])
+  t.deepEqual(r.round.pots, {pots: [], return: []})
+  t.deepEqual(
+    r.round.bets,
+    [
+      {playerId: "2", amount: 30},
+      {playerId: "3", amount: 2},
+      {playerId: "4", amount: 65},
+      {playerId: "1", amount: 50}])
+})
+
+test("4-player: BB bet", t => {
+  const table = {
+    ...table3,
+    players: [
+      {id: "1", stack: 0},
+      {id: "2", stack: 0},
+      {id: "3", stack: 68},
+      {id: "4", stack: 0}]
+  }
+
+  const round1 = {
+    ...round,
+    utg: "4",
+    whoActed: ["4", "1", "2"],
+    players: ["1", "2", "3", "4"],
+    bets: [
+      {playerId: "2", amount: 30},
+      {playerId: "3", amount: 2},
+      {playerId: "4", amount: 65},
+      {playerId: "1", amount: 50}]}
+
+  const r = bet({playerId: "3", amount: 68})({table, round: round1})
+
+  t.deepEqual(r.round.nextPlayer, "4")
+  t.deepEqual(r.round.whoActed, [])
+  t.deepEqual(r.round.status, ROUND_STATUS[2])
+  t.deepEqual(r.round.bets, [])
+  t.deepEqual(r.table.players, [
+    {id: "1", stack: 0},
+    {id: "2", stack: 0},
+    {id: "3", stack: 5},
+    {id: "4", stack: 0}])
+  t.deepEqual(
+    r.round.pots,
+    {
+      pots: [
+        {amount: 120, players: ["2", "3", "4", "1"]},
+        {amount: 60, players: ["3", "4", "1"]},
+        {amount: 30, players: ["3", "4"]}],
+      return: []})
+})
+
 test("2-player: SB fold", t => {
   const round1 = {...round, bets: [{playerId: "1", amount: 1}, {playerId: "2", amount: 2}]}
   const r = fold("1")({table: table1, round: round1})
