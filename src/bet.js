@@ -80,6 +80,27 @@ const calculatePots = def("calculatePots")({})([$.Array(Bet), Pots])
         ([{bets: [], m: 0, amount: 0}])
         (bets))))
 
+
+const getNextPlayer = ({round, table, allIn}) => {
+  const ps = table.players.filter(p => round.players.indexOf(p.id) > -1)
+
+  const inner = pid => {
+    const pi = ps.findIndex(p => p.id === pid)
+
+    if (allIn) {
+      return round.utg
+    }
+
+    if (ps[pi].stack > 0) {
+      return ps[pi].id
+    }
+
+    return inner(ps[(pi + 1) % ps.length].id)
+  }
+
+  return inner
+}
+
 //    bet :: Bet -> Game -> Game
 const bet = def("bet")({})([Bet, Game, Game])
   (bet => state => {
@@ -174,21 +195,6 @@ const bet = def("bet")({})([Bet, Game, Game])
         }
       })(updatedPlayers)
 
-      const ps = table.players.filter(p => round.players.indexOf(p.id) > -1)
-      const getNP = pid => {
-        const pi = round.players.findIndex(id => id === pid)
-
-        if (allIn) {
-          return round.utg
-        }
-
-        if (ps[pi].stack > 0) {
-          return ps[pi].id
-        }
-
-        return getNP(ps[(pi + 1) % ps.length].id)
-      }
-
       const updatedTable = {...table, players}
       const updatedRound = {
         ...round,
@@ -198,7 +204,7 @@ const bet = def("bet")({})([Bet, Game, Game])
           pots: pots.pots,
           return: [],
         },
-        nextPlayer: getNP(round.utg),
+        nextPlayer: getNextPlayer({round, table, allIn})(round.utg),
         whoActed: [],
         streetStatus: STREET_STATUS[1],
         street: round.street === STREETS[3]? STREETS[4] : round.street
@@ -273,8 +279,8 @@ const postBlinds = def("postBlinds")({})([Game, Game])
 const fold = def("fold")({})([Player.types.id, Game, Game])
   (id => ({table, round}) => {
     const {players} = table
-    const pots = S.reduce(acc => pot => acc + pot.amount)(0)(round.pots.pots)
-    const pot = S.reduce(acc => bet => acc + bet.amount)(pots)(round.bets)
+    const potSum = S.reduce(acc => pot => acc + pot.amount)(0)(round.pots.pots)
+    const pot = S.reduce(acc => bet => acc + bet.amount)(potSum)(round.bets)
     const roundPlayers = S.filter(pid => pid !== id)(round.players)
 
     if (players.length === 2) {
@@ -299,19 +305,59 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
         return: round.pots.return,
       }
 
-      if (roundPlayers.length === round.whoActed.length) {
+      const playersNotAllIn = S.filter
+        (p => roundPlayers.indexOf(p.id) > -1 && p.stack > 0)
+        (table.players)
+      const allIn = playersNotAllIn.length <= 1
+      const roundStatus = allIn? ROUND_STATUS[2] : round.status
+      if (playersNotAllIn.length <= round.whoActed.length) {
+        const updatedPots = round.bets.length === 1?
+          {
+            pots: [{players: roundPlayers, amount: potSum}],
+            return: round.bets,
+          } :
+          {
+            pots: [{players: roundPlayers, amount: pot}],
+            return: [],
+          }
+
+        const players = S.map(p => {
+          const isReturnPlayer = S.maybe
+            (false)
+            (id => id === p.id)
+            (S.get
+              (S.is($.String))
+              ("playerId")
+              (updatedPots.return[0]))
+
+          const returnAmount = isReturnPlayer? S.fromMaybe
+            (0)
+            (S.get
+              (S.is($.Number))
+              ("amount")
+              (updatedPots.return[0])) : 0
+
+          return {
+            ...p,
+            stack: p.stack + returnAmount,
+          }
+        })(table.players)
+
         return {
-          table,
+          table: {
+            ...table,
+            players,
+          },
           round: {
             ...round,
-            nextPlayer,
+            status: roundStatus,
+            nextPlayer: getNextPlayer
+              ({round: {...round, players: roundPlayers}, table, allIn})
+              (nextPlayer),
             streetStatus: STREET_STATUS[1],
             players: roundPlayers,
             bets: [],
-            pots: {
-              pots: [{players: roundPlayers, amount: pot}],
-              return: [],
-            },
+            pots: updatedPots,
           },
         }
       }
@@ -320,7 +366,10 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
         table,
         round: {
           ...round,
-          nextPlayer,
+          status: roundStatus,
+          nextPlayer: getNextPlayer
+            ({round: {...round, players: roundPlayers}, table, allIn})
+            (nextPlayer),
           players: roundPlayers,
           bets: round.bets.filter(b => b.playerId !== id),
           pots: bet.amount > 0?

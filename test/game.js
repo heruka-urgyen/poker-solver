@@ -544,3 +544,85 @@ test("play round 3 players", t => {
   t.regex(r[17].round.winners.length.toString(), /1|2/)
   t.regex(S.map(p => p.stack)(r[18].table.players).toString(), /105,90,105|210,90,0|0,90,210/)
 })
+
+test("play round 3 players all in", t => {
+  const table = newTable("1")(3)
+
+  const r = newGame(table)
+    .update(actions => actions.sitPlayer({id: "1", stack: 50}))
+    .update(actions => actions.sitPlayer({id: "2", stack: 100}))
+    .update(actions => actions.sitPlayer({id: "3", stack: 100}))
+    .update(actions => actions.newRound)
+    .update(actions => actions.postBlinds)
+    .update(actions => actions.deal)
+    .update(actions => actions.bet(50))
+    .update(actions => actions.bet(49))
+    .update(actions => actions.bet(48))
+    .update(actions => actions.deal)
+    .update(actions => actions.bet(50))
+    .update(actions => actions.bet(50))
+    .update(actions => actions.deal)
+    .update(actions => actions.deal)
+    .update(actions => actions.getWinners)
+    .update(actions => actions.endRound)
+    .getAll()
+
+  t.deepEqual(r[5].round.street, STREETS[0])
+  t.deepEqual(r[7].round.street, STREETS[0])
+  t.deepEqual(r[10].round.street, STREETS[1])
+  t.deepEqual(r[13].round.street, STREETS[2])
+  t.deepEqual(r[14].round.street, STREETS[3])
+  t.deepEqual(r[9].round.pots, {pots: [{amount: 150, players: ["2", "3", "1"]}], return: []})
+  t.deepEqual(
+    r[12].round.pots,
+    {
+      pots: [
+        {amount: 150, players: ["2", "3", "1"]},
+        {amount: 100, players: ["2", "3"]}],
+      return: []})
+  t.deepEqual(r[12].round.status, ROUND_STATUS[2])
+
+  t.regex(
+    S.map(p => p.stack)(r[16].table.players).toString(),
+    /150,100,0|150,0,100|150,50,50|75,175,0|75,0,175|50,100,100|0,125,125|0,250,0|0,0,250/)
+})
+
+test("play round 3 players all in fold", t => {
+  const table = newTable("1")(3)
+
+  const r = newGame(table)
+    .update(actions => actions.sitPlayer({id: "1", stack: 50}))
+    .update(actions => actions.sitPlayer({id: "2", stack: 100}))
+    .update(actions => actions.sitPlayer({id: "3", stack: 100}))
+    .update(actions => actions.newRound)
+    .update(actions => actions.postBlinds)
+    .update(actions => actions.deal)
+    .update(actions => actions.bet(50))
+    .update(actions => actions.bet(49))
+    .update(actions => actions.bet(48))
+    .update(actions => actions.deal)
+    .update(actions => actions.bet(50))
+    .update(actions => actions.fold)
+    .update(actions => actions.deal)
+    .update(actions => actions.deal)
+    .update(actions => actions.getWinners)
+    .update(actions => actions.endRound)
+    .getAll()
+
+  t.deepEqual(r[5].round.street, STREETS[0])
+  t.deepEqual(r[7].round.street, STREETS[0])
+  t.deepEqual(r[10].round.street, STREETS[1])
+  t.deepEqual(r[13].round.street, STREETS[2])
+  t.deepEqual(r[14].round.street, STREETS[3])
+
+  t.deepEqual(r[9].round.pots, {pots: [{amount: 150, players: ["2", "3", "1"]}], return: []})
+  t.deepEqual(
+    r[12].round.pots,
+    {
+      pots: [{amount: 150, players: ["1", "2"]}],
+      return: [{playerId: "2", amount: 50}]})
+  t.deepEqual(r[12].round.status, ROUND_STATUS[2])
+  t.regex(
+    S.map(p => p.stack)(r[16].table.players).toString(),
+    /150,50,50|0,200,50|75,125,50/)
+})
