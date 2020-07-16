@@ -262,20 +262,15 @@ const endRound = def("endRound")({})([Game, Game])
         ...table,
         players: S.map
           (p => {
-            const maybeWinner = S.find(w => w.playerId === p.id)(winners)
-            const winAmount = S.fromMaybe
+            const winAmount = S.reduce
+              (acc => w => acc + w.amount)
               (0)
-              (S.chain
-                (S.get(S.is($.Number))("amount"))(maybeWinner))
+              (S.filter(w => w.playerId === p.id)(winners))
 
-            if (S.isJust(maybeWinner)) {
               return {
                 ...p,
                 stack: p.stack + winAmount,
               }
-            }
-
-            return p
           })
           (table.players)
       },
