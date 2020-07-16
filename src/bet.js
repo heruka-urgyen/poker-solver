@@ -174,6 +174,21 @@ const bet = def("bet")({})([Bet, Game, Game])
         }
       })(updatedPlayers)
 
+      const ps = table.players.filter(p => round.players.indexOf(p.id) > -1)
+      const getNP = pid => {
+        const pi = round.players.findIndex(id => id === pid)
+
+        if (allIn) {
+          return round.utg
+        }
+
+        if (ps[pi].stack > 0) {
+          return ps[pi].id
+        }
+
+        return getNP(ps[(pi + 1) % ps.length].id)
+      }
+
       const updatedTable = {...table, players}
       const updatedRound = {
         ...round,
@@ -183,7 +198,7 @@ const bet = def("bet")({})([Bet, Game, Game])
           pots: pots.pots,
           return: [],
         },
-        nextPlayer: round.utg,
+        nextPlayer: getNP(round.utg),
         whoActed: [],
         streetStatus: STREET_STATUS[1],
         street: round.street === STREETS[3]? STREETS[4] : round.street
