@@ -222,7 +222,7 @@ const bet = def("bet")({})([Bet, Game, Game])
       bets: updatedBets,
       pots: round.pots,
       nextPlayer,
-      whoActed: whoActed,
+      whoActed,
       street: round.street,
     }
 
@@ -288,6 +288,7 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
         table,
         round: {
           ...round,
+          nextPlayer: roundPlayers[0],
           players: roundPlayers,
           bets: [],
           pots: {
@@ -298,28 +299,44 @@ const fold = def("fold")({})([Player.types.id, Game, Game])
       }
     } else {
       const bet = S.fromMaybe({amount: 0})(S.find(b => b.playerId === id)(round.bets))
-      const nextPlayer = round.players[
-        (round.players.findIndex(id => id === round.nextPlayer) + 1) % round.players.length]
       const updatedPots = {
         pots: round.pots.pots.map(p => ({...p, players: roundPlayers})),
         return: round.pots.return,
       }
+      const nextPlayer = round.players[
+        (round.players.findIndex(pid => pid === id) + 1) % round.players.length]
 
       const playersNotAllIn = S.filter
         (p => roundPlayers.indexOf(p.id) > -1 && p.stack > 0)
         (table.players)
       const allIn = playersNotAllIn.length <= 1
       const roundStatus = allIn? ROUND_STATUS[2] : round.status
-      if (playersNotAllIn.length <= round.whoActed.length) {
+      const whoActed = round.whoActed || []
+
+      if (playersNotAllIn.length <= whoActed.length) {
         const updatedPots = round.bets.length === 1?
           {
             pots: [{players: roundPlayers, amount: potSum}],
             return: round.bets,
           } :
-          {
-            pots: [{players: roundPlayers, amount: pot}],
-            return: [],
-          }
+          combinePots
+            (combinePots
+              (calculatePots(S.filter(b => b.playerId !== id)(round.bets)))
+              ({
+                return: [],
+                pots: S.map
+                  (({amount}) => ({amount, players: roundPlayers}))
+                  (S.filter(b => b.playerId === id)(round.bets))
+              }))
+            ({
+              return: [],
+              pots: S.map(p => {
+                if (S.equals(p.players)(round.players)) {
+                  return {...p, players: roundPlayers}
+                }
+
+                return p
+              })(round.pots.pots)})
 
         const players = S.map(p => {
           const isReturnPlayer = S.maybe
