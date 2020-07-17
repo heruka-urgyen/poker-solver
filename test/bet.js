@@ -235,7 +235,6 @@ test("4-player: BB bet", t => {
 
   const r = bet({playerId: "3", amount: 68})({table, round: round1})
 
-  t.deepEqual(r.round.nextPlayer, "4")
   t.deepEqual(r.round.whoActed, [])
   t.deepEqual(r.round.status, ROUND_STATUS[2])
   t.deepEqual(r.round.bets, [])
@@ -255,12 +254,17 @@ test("4-player: BB bet", t => {
 })
 
 test("2-player: SB fold", t => {
+  const table = {
+    ...table1,
+    players: [{id: "1", stack: 49}, {id: "2", stack: 28}]
+  }
   const round1 = {...round, bets: [{playerId: "1", amount: 1}, {playerId: "2", amount: 2}]}
-  const r = fold("1")({table: table1, round: round1})
+  const r = fold("1")({table, round: round1})
 
   t.deepEqual(r.round.nextPlayer, "2")
   t.deepEqual(r.round.players, ["2"])
-  t.deepEqual(r.round.pots, {pots: [{amount: 3, players: ["2"]}], return: []})
+  t.deepEqual(r.table.players, [{id: "1", stack: 49}, {id: "2", stack: 29}])
+  t.deepEqual(r.round.pots, {pots: [{amount: 2, players: ["2"]}], return: []})
 })
 
 test("2-player: BB fold", t => {
@@ -273,16 +277,28 @@ test("2-player: BB fold", t => {
 })
 
 test("2-player: fold with non-empty pot", t => {
+  const table = {
+    ...table1,
+    players: [
+      {id: "1", stack: 28},
+      {id: "2", stack: 18},
+    ],
+  }
   const round1 = {
       ...round,
       bets: [{playerId: "1", amount: 20}, {playerId: "2", amount: 10}],
-      pots: {pots: [{amount: 4, players: ["1", "2"]}], return: []},
-  }
-  const r = fold("2")({table: table1, round: round1})
+      pots: {pots: [{amount: 4, players: ["1", "2"]}], return: []},}
+  const r = fold("2")({table, round: round1})
 
   t.deepEqual(r.round.nextPlayer, "1")
   t.deepEqual(r.round.players, ["1"])
-  t.deepEqual(r.round.pots, {pots: [{amount: 34, players: ["1"]}], return: []})
+  t.deepEqual(r.table.players,
+    [
+      {id: "1", stack: 38},
+      {id: "2", stack: 18},
+    ],
+  )
+  t.deepEqual(r.round.pots, {pots: [{amount: 24, players: ["1"]}], return: []})
 })
 
 test("3-player: UTG fold", t => {
@@ -324,13 +340,21 @@ test("3-player: BB fold", t => {
 })
 
 test("3-player: fold with non-empty pot", t => {
+  const table = {
+    ...table2,
+    players: [
+      {id: "1", stack: 28},
+      {id: "2", stack: 8},
+      {id: "3", stack: 68},
+    ],
+  }
   const round1 = {
     ...round,
     whoActed: ["1", "2"],
     players: ["1", "2", "3"],
     pots: {pots: [{amount: 6, players: ["1", "2", "3"]}], return: []},
     bets: [{playerId: "1", amount: 20}, {playerId: "2", amount: 20}]}
-  const r = fold("3")({table: table2, round: round1})
+  const r = fold("3")({table, round: round1})
 
   t.deepEqual(r.round.nextPlayer, "1")
   t.deepEqual(r.round.players, ["1", "2"])
@@ -409,6 +433,15 @@ test("4-player: id: 2 folds with non-empty pot", t => {
 })
 
 test("4-player: id: 3, id: 4 fold with non-empty pot", t => {
+  const table = {
+    ...table3,
+    players: [
+    {id: "1", stack: 0},
+    {id: "2", stack: 0},
+    {id: "3", stack: 68},
+    {id: "4", stack: 53},
+    ],
+  }
   const round1 = {
     ...round,
     whoActed: ["4", "1"],
@@ -419,7 +452,7 @@ test("4-player: id: 3, id: 4 fold with non-empty pot", t => {
       {playerId: "1", amount: 48},
       {playerId: "2", amount: 28}]}
 
-  const r = fold("3")({table: table3, round: round1})
+  const r = fold("3")({table, round: round1})
 
   t.deepEqual(r.round.nextPlayer, "4")
   t.deepEqual(r.round.players, ["1", "2", "4"])
@@ -429,11 +462,17 @@ test("4-player: id: 3, id: 4 fold with non-empty pot", t => {
 
   t.deepEqual(r2.round.nextPlayer, "1")
   t.deepEqual(r2.round.players, ["1", "2"])
+  t.deepEqual(r2.table.players, [
+    {id: "1", stack: 20},
+    {id: "2", stack: 0},
+    {id: "3", stack: 68},
+    {id: "4", stack: 53},
+  ])
   t.deepEqual(
     r2.round.pots,
     {
       pots: [{amount: 74, players: ["1", "2"]}],
-      return: [{playerId: "1", amount: 20}]})
+      return: []})
 })
 
 test("calculate pots", t => {

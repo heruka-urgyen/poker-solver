@@ -434,11 +434,12 @@ test("2-players: leavePlayer", t => {
   t.deepEqual(r[7].table.players, [{id: "1", stack: 3}])
   t.deepEqual(r[7].round.players, ["1"])
   t.deepEqual(r[7].round.bets, [])
+  t.deepEqual(r[7].table.players, [{id: "1", stack: 3}])
   t.deepEqual(
     r[7].round.pots,
     {
       pots: [
-        {players: ["1"], amount: 22},
+        {players: ["1"], amount: 4},
       ],
       return: [],
     },
@@ -459,20 +460,18 @@ test("2-players: leavePlayer preflop", t => {
     .update(actions => actions.getWinners)
     .getAll()
 
-  t.deepEqual(r[3].table.players, [{id: "2", stack: 18}])
   t.deepEqual(r[3].round.players, ["2"])
   t.deepEqual(r[3].round.bets, [])
-
+  t.deepEqual(r[3].table.players, [{id: "2", stack: 19}])
   t.deepEqual(
     r[3].round.pots,
     {
       pots: [
-        {players: ["2"], amount: 3},
+        {players: ["2"], amount: 2},
       ],
       return: [],
     },
   )
-
   t.deepEqual(r[4].round.winners.map(w => w.playerId), ["2"])
 })
 
@@ -484,10 +483,10 @@ test("2-player: bet - fold", t => {
   }
 
   const res2 = {
-    players: [{id: "1", stack: 39}, {id: "2", stack: 28}],
+    players: [{id: "1", stack: 48}, {id: "2", stack: 28}],
     bets: [],
     pots: {
-      pots: [{amount: 13, players: ["1"]}],
+      pots: [{amount: 4, players: ["1"]}],
       return: [],
     },
   }
@@ -532,10 +531,10 @@ test("2-player: call - check - bet - fold", t => {
   }
 
   const res4 = {
-    players: [{id: "1", stack: 38}, {id: "2", stack: 28}],
+    players: [{id: "1", stack: 48}, {id: "2", stack: 28}],
     bets: [],
     pots: {
-      pots: [{amount: 14, players: ["1"]}],
+      pots: [{amount: 4, players: ["1"]}],
       return: [],
     },
   }
@@ -626,7 +625,7 @@ test("3-player: bet - call - fold", t => {
     players: [{id: "1", stack: 40}, {id: "2", stack: 20}, {id: "3", stack: 68}],
     bets: [],
     pots: {
-      pots: [{amount: 22, players: ["2", "1"]}],
+      pots: [{amount: 22, players: ["1", "2"]}],
       return: [],
     },
   }
@@ -887,10 +886,9 @@ test("play round 3 players all in fold", t => {
 
   t.deepEqual(r[9].round.pots, {pots: [{amount: 150, players: ["2", "3", "1"]}], return: []})
   t.deepEqual(
-    r[12].round.pots,
-    {
-      pots: [{amount: 150, players: ["1", "2"]}],
-      return: [{playerId: "2", amount: 50}]})
+    r[12].table.players,
+    [{id: "1", stack: 0}, {id: "2", stack: 50}, {id: "3", stack: 50}])
+  t.deepEqual(r[12].round.pots, {pots: [{amount: 150, players: ["1", "2"]}], return: []})
   t.deepEqual(r[12].round.status, ROUND_STATUS[2])
   t.regex(
     S.map(p => p.stack)(r[16].table.players).toString(),
