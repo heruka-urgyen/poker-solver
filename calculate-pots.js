@@ -7,7 +7,7 @@ const {calculatePots} = require("./index")
 
 // cli arguments
 const {ids, bets} = argv
-const playerIds = ids.map(x => x.toString())
+const playerIds = S.map(x => x.toString())(ids)
 const result =
   calculatePots(S.zipWith(playerId => amount => ({playerId, amount}))(playerIds)(bets))
 

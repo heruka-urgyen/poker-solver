@@ -7,10 +7,11 @@ const cliProgress = require("cli-progress")
 
 const {
   STREETS,
+  STREET_STATUS,
+  ROUND_STATUS,
   newRoundExtended,
   deal,
   computeRoundWinners,
-  newGame,
   newCard,
   newDeck,
 } = require("./index")
@@ -23,22 +24,29 @@ const {p, n, h} = argv
 const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic)
 
 const getTable = p => ({
-  id: 1,
+  id: "1",
   maxPlayers: p,
-  players: S.map(p => ({id: `${p}`}))(S.range(1)(p + 1)),
+  players: S.map(p => ({id: p.toString(), stack: 100}))(S.range(1)(p + 1)),
 })
 
 const getRound = p => i => newRoundExtended
-  (i)
+  (i.toString())
   (getTable(p))
   ((i - 1) % p)
   (Pair(1)(2))
   ([Pair("1")(S.map(newCard)(h.match(/.{2,2}/g)))])
   (newDeck("shuffle"))
 
-const getNewGame = p => i => newGame({table: getTable(p), round: getRound(p)(i)})
+const getNewGame = p => i => ({table: getTable(p), round: getRound(p)(i)})
 
-const nextStreet = street => STREETS[STREETS.indexOf(street) + 1]
+const goAllIn = ({table, round}) => ({
+  table,
+  round: {
+    ...round,
+    status: ROUND_STATUS[2],
+    streetStatus: STREET_STATUS[1],
+  },
+})
 
 bar1.start(n, 0)
 
@@ -58,18 +66,11 @@ const result = S.reduce
   (S.map
     (i => {
       bar1.update(i)
-      const run = getNewGame(p)(i)
-      const [_1, _2, _3, _4, _5, _6, _7, _8, r] = [
-        s => ({...s, round: deal(s.round)}),
-        s => ({...s, round: {...s.round, street: nextStreet(s.round.street)}}),
-        s => ({...s, round: deal(s.round)}),
-        s => ({...s, round: {...s.round, street: nextStreet(s.round.street)}}),
-        s => ({...s, round: deal(s.round)}),
-        s => ({...s, round: {...s.round, street: nextStreet(s.round.street)}}),
-        s => ({...s, round: deal(s.round)}),
-        s => ({...s, round: {...s.round, street: nextStreet(s.round.street)}}),
-        s => ({...s, round: computeRoundWinners(s.round)}),
-      ].map(run)
+
+      const r = S.reduce
+        (state => f => f(state))
+        (getNewGame(p)(i))
+        ([deal, goAllIn, deal, deal, deal, computeRoundWinners])
 
       return r.round.winners
     })

@@ -356,6 +356,7 @@ const stateToActions = state => {
 
     const update = states => f => {
       const state = states[states.length - 1]
+      console.log(stateToActions(state))
       const states2 = states.concat(f(stateToActions(state))(state))
 
       return {update: update(states2), getAll: getAll(states2), get: get(states2)}
