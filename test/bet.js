@@ -3,7 +3,7 @@ const Pair = require("sanctuary-pair")
 
 const {calculatePots, postBlinds, bet, fold} = require("../src/bet")
 const {newGame, newFirstRound} = require("../src/game")
-const {newDeck} = require("../src/card")
+const {randomDeck} = require("../src/card")
 const {ROUND_STATUS, STREETS} = require("../src/types")
 
 const table1 = {
@@ -31,7 +31,7 @@ const round = {
   street: STREETS[0],
   streetStatus: "IN_PROGRESS",
   tableId: "1",
-  deck: newDeck("shuffle"),
+  deck: randomDeck(),
   communityCards: [],
   cards: [],
   button: 1,

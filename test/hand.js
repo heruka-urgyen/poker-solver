@@ -3,7 +3,7 @@ const S = require("sanctuary")
 const Pair = require("sanctuary-pair")
 
 const {solveHand, compareHands, selectWinningHands} = require ("../src/hand")
-const {newCard, newDeck} = require ("../src/card")
+const {newCard} = require ("../src/card")
 const {CARD_SUITS, CARD_RANKS, STREETS} = require("../src/types")
 
 const highCard = S.map(newCard)(["2c", "4c", "9h", "Ah", "7h", "Jh", "Tc"])
@@ -19,13 +19,6 @@ const flush = S.map(newCard)(["2h", "4c", "9h", "Ah", "7h", "Jh", "Tc"])
 const fullHouse = S.map(newCard)(["2c", "4d", "2h", "Ah", "4h", "2d", "Tc"])
 const quads = S.map(newCard)(["2c", "2d", "2h", "Ah", "4h", "2s", "Tc"])
 const straightFlush = S.map(newCard)(["2h", "4h", "3h", "Ah", "7h", "5h", "Tc"])
-
-test("newDeck without shuffling", t => {
-  t.deepEqual(
-    newDeck("order"),
-    S.chain(r => S.map(s => newCard(r + s))(CARD_SUITS))(CARD_RANKS)
-  )
-})
 
 test("select winning hands from two", t => {
   t.deepEqual(

@@ -13,7 +13,7 @@ const {
   deal,
   computeRoundWinners,
   newCard,
-  newDeck,
+  randomDeck,
 } = require("./index")
 
 // cli arguments
@@ -35,7 +35,7 @@ const getRound = p => i => newRoundExtended
   ((i - 1) % p)
   (Pair(1)(2))
   ([Pair("1")(S.map(newCard)(h.match(/.{2,2}/g)))])
-  (newDeck("shuffle"))
+  (randomDeck())
 
 const getNewGame = p => i => ({table: getTable(p), round: getRound(p)(i)})
 

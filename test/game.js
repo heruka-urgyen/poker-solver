@@ -18,10 +18,10 @@ const {
 } = require ("../src/game")
 
 const {STREETS, ROUND_STATUS} = require("../src/types")
-const {newCard, showCard, newDeck} = require("../src/card")
+const {newCard, showCard, orderedDeck} = require("../src/card")
 const {postBlinds, bet} = require("../src/bet")
 
-const deck = newDeck("order")
+const deck = orderedDeck()
 
 const table1 = {
   id: "1",

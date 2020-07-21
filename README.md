@@ -8,7 +8,9 @@ Exposes some functions such as
 ```
 showCard :: Card -> CardNotation
 newCard :: CardNotation -> Card
-newDeck :: (Order | Shuffle) -> Cards
+orderedDeck :: () -> Cards
+randomDeck :: () -> Cards
+seededDeck :: String -> Cards
 solveHand :: Cards -> Maybe Hand
 compareHands :: Hand -> Hand -> [Hand]
 selectWinningHands :: [Pair Player.id Cards] -> [Hand]

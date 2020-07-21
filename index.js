@@ -10,7 +10,9 @@ const {
 const {
   showCard,
   newCard,
-  newDeck,
+  orderedDeck,
+  randomDeck ,
+  seededDeck,
 } = require("./src/card")
 
 const {
@@ -35,7 +37,9 @@ module.exports = {
 
   showCard,
   newCard,
-  newDeck,
+  orderedDeck,
+  randomDeck ,
+  seededDeck,
 
   calculatePots,
 

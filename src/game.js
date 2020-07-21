@@ -19,7 +19,7 @@ const {
   ROUND_STATUS,
   Game,
 } = require("./types")
-const {newCard, newDeck} = require("./card")
+const {newCard, randomDeck} = require("./card")
 const {selectWinningHands} = require("./hand")
 const {postBlinds, fold, bet} = require("./bet")
 
@@ -139,7 +139,7 @@ const _newRound = def
         ((button + 1) % table.players.length)
         (blinds)
         ([])
-        (newDeck("shuffle")),
+        (randomDeck()),
     }
   })
 
