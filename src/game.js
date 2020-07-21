@@ -116,18 +116,18 @@ const newRoundExtended = def("newRoundExtended")({})
     }
   })
 
-//    newRound :: Game -> Game
-const newRound = ({table, round}) => _newRound({table, round: S.Just(round)})
+//    newRound :: Cards -> Game -> Game
+const newRound = deck => ({table, round}) => _newRound({table, round: S.Just(round), deck})
 
-//    newRound :: Game -> Game
-const newFirstRound = ({table}) => _newRound({table, round: S.Nothing})
+//    newRound :: Cards -> Game -> Game
+const newFirstRound = deck => ({table}) => _newRound({table, round: S.Nothing, deck})
 
-//    newRound0 :: {Table, Maybe Round} -> Game
+//    newRound0 :: {Table, Maybe Round, Cards} -> Game
 const _newRound = def
   ("newRound")
   ({})
-  ([$.RecordType({table: Table, round: $.Maybe(Round)}), Game])
-  (({table, round}) => {
+  ([$.RecordType({table: Table, round: $.Maybe(Round), deck: Cards}), Game])
+  (({table, round, deck}) => {
     const newRoundId = uuid.v4
     const [button, blinds] = S.maybe([-1, Pair(1)(2)])(r => [r.button, r.blinds])(round)
 
@@ -139,7 +139,7 @@ const _newRound = def
         ((button + 1) % table.players.length)
         (blinds)
         ([])
-        (randomDeck()),
+        (deck),
     }
   })
 
