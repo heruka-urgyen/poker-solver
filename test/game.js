@@ -748,7 +748,6 @@ test("play round 2 players", t => {
     .update(actions => actions.bet(88))
     .update(actions => actions.getWinners)
     .update(actions => actions.endRound)
-    .update(actions => actions.newRound(randomDeck()))
     .getAll()
 
   t.deepEqual(r[3].round.utg, "1")
@@ -772,13 +771,7 @@ test("play round 2 players", t => {
   t.deepEqual(r[16].round.pots, {pots: [{amount: 200, players: ["1", "2"]}], return: []})
   t.true(r[17].round.winners.length > 0)
   t.deepEqual(r[18].round.status, ROUND_STATUS[1])
-  t.regex(S.map(p => p.stack)(r[18].table.players).toString(), /100,100|200,0|0,200/)
-  t.deepEqual(r[19].table, r[18].table)
-  t.deepEqual(r[19].round.tableId, r[19].table.id)
-  t.deepEqual(r[19].round.button, 1)
-  t.deepEqual(r[19].round.blindsPosted, false)
-  t.deepEqual(r[19].round.street, STREETS[0])
-  t.deepEqual(r[19].round.streetStatus, "IN_PROGRESS")
+  t.regex(S.map(p => p.stack)(r[18].table.players).toString(), /100,100|200|200/)
 })
 
 test("play round 3 players", t => {
@@ -811,7 +804,7 @@ test("play round 3 players", t => {
   t.deepEqual(r[14].round.status, ROUND_STATUS[2])
   t.deepEqual(r[17].round.pots, {pots: [{amount: 210, players: ["1", "3"]}], return: []})
   t.regex(r[17].round.winners.length.toString(), /1|2/)
-  t.regex(S.map(p => p.stack)(r[18].table.players).toString(), /105,90,105|210,90,0|0,90,210/)
+  t.regex(S.map(p => p.stack)(r[18].table.players).toString(), /105,90,105|210,90|90,210/)
 })
 
 test("play round 3 players all in", t => {
@@ -853,7 +846,7 @@ test("play round 3 players all in", t => {
 
   t.regex(
     S.map(p => p.stack)(r[16].table.players).toString(),
-    /150,100,0|150,0,100|150,50,50|75,175,0|75,0,175|50,100,100|0,125,125|0,250,0|0,0,250/)
+    /150,100|150,100|150,50,50|75,175|75,175|50,100,100|125,125|250|250/)
 })
 
 test("play round 3 players all in fold", t => {
@@ -892,5 +885,5 @@ test("play round 3 players all in fold", t => {
   t.deepEqual(r[12].round.status, ROUND_STATUS[2])
   t.regex(
     S.map(p => p.stack)(r[16].table.players).toString(),
-    /150,50,50|0,200,50|75,125,50/)
+    /150,50,50|200,50|75,125,50/)
 })

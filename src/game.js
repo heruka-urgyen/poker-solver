@@ -260,7 +260,7 @@ const endRound = def("endRound")({})([Game, Game])
     return {
       table: {
         ...table,
-        players: S.map
+        players: S.filter(p => p.stack > 0)(S.map
           (p => {
             const winAmount = S.reduce
               (acc => w => acc + w.amount)
@@ -272,7 +272,7 @@ const endRound = def("endRound")({})([Game, Game])
                 stack: p.stack + winAmount,
               }
           })
-          (table.players)
+          (table.players))
       },
       round: {
         ...round,
