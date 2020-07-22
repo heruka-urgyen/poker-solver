@@ -345,6 +345,20 @@ const stateToActions = state => {
   return actions
 }
 
+const reducer = state => {
+  const get = states => () => states[states.length - 1]
+  const getAll = states => () => states
+
+  const update = states => f => {
+    const state = states[states.length - 1]
+    const states2 = states.concat(f(stateToActions(state))(state))
+
+    return {update: update(states2), getAll: getAll(states2), get: get(states2)}
+  }
+
+  return {update: update([state]), getAll: getAll([state]), get: get([state])}
+}
+
 //      newGame :: Table -> (Game -> Game) -> Game
   const newGame = table => {
     const state = {
@@ -352,17 +366,23 @@ const stateToActions = state => {
       round: {status: ROUND_STATUS[1]},
     }
 
-    const get = states => () => states[states.length - 1]
-    const getAll = states => () => states
+    return reducer(state)
+  }
 
-    const update = states => f => {
-      const state = states[states.length - 1]
-      const states2 = states.concat(f(stateToActions(state))(state))
-
-      return {update: update(states2), getAll: getAll(states2), get: get(states2)}
+//      loadGame :: (JSON Game | Game) -> (Game -> Game) -> Game
+  const loadGame = ({table, round}) => {
+    // serialized game object replaces Pair with object like {fst, snd}
+    // this is a fix that creates Pairs when necessary
+    const state = {
+      table,
+      round: {
+        ...round,
+        blinds: round.blinds? Pair(Pair.fst(round.blinds))(Pair.snd(round.blinds)) : [],
+        cards: round.cards? S.map(c => Pair(Pair.fst(c))(Pair.snd(c)))(round.cards) : [],
+      },
     }
 
-    return {update: update([state]), getAll: getAll([state]), get: get([state])}
+    return reducer(state)
   }
 
 module.exports = {
@@ -377,4 +397,5 @@ module.exports = {
   _computeRoundWinners,
   endRound,
   newGame,
+  loadGame,
 }

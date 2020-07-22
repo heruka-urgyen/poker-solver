@@ -25,6 +25,7 @@ const {
   deal,
   computeRoundWinners,
   newGame,
+  loadGame,
 } = require("./src/game")
 
 module.exports = {
@@ -48,4 +49,5 @@ module.exports = {
   deal,
   computeRoundWinners,
   newGame,
+  loadGame,
 }
