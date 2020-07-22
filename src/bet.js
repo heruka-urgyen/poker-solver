@@ -312,11 +312,9 @@ const postBlinds = def("postBlinds")({})([Game, Game])
       return {table, round}
     }
 
-    const playersOnBlinds = S.filter
-      (p => S.map
-        (i => players[i % players.length])
-        ([button + 1, button + 2]).indexOf(p.id) > -1)
-      (table.players)
+    const playersOnBlinds = S.map
+      (i => table.players.find(p => p.id === players[i % players.length]))
+      (players.length === 2? [button, button + 1] : [button + 1, button + 2])
 
     const bets = S.bimap
       (amount => ({playerId: playersOnBlinds[0].id, amount}))
