@@ -279,6 +279,7 @@ const endRound = def("endRound")({})([Game, Game])
         status: ROUND_STATUS[1],
         communityCards: [],
         cards: [],
+        pots: {pots: [], return: []},
       },
     }
   })
