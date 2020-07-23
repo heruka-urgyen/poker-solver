@@ -359,31 +359,43 @@ const reducer = state => {
   return {update: update([state]), getAll: getAll([state]), get: get([state])}
 }
 
-//      newGame :: Table -> (Game -> Game) -> Game
-  const newGame = table => {
-    const state = {
-      table,
-      round: {status: ROUND_STATUS[1]},
-    }
-
-    return reducer(state)
+//    newGame :: Table -> (Game -> Game) -> Game
+const newGame = table => {
+  const state = {
+    table,
+    round: {status: ROUND_STATUS[1]},
   }
 
-//      loadGame :: (JSON Game | Game) -> (Game -> Game) -> Game
-  const loadGame = ({table, round}) => {
-    // serialized game object replaces Pair with object like {fst, snd}
-    // this is a fix that creates Pairs when necessary
-    const state = {
-      table,
-      round: {
-        ...round,
-        blinds: round.blinds? Pair(Pair.fst(round.blinds))(Pair.snd(round.blinds)) : [],
-        cards: round.cards? S.map(c => Pair(Pair.fst(c))(Pair.snd(c)))(round.cards) : [],
-      },
-    }
+  return reducer(state)
+}
 
-    return reducer(state)
+const toMaybe = v => (v == null) || Object.keys(v).length === 0 ? S.Nothing : S.Just(v)
+
+//    loadGame :: (JSON Game | Game) -> (Game -> Game) -> Game
+const loadGame = ({table, round}) => {
+  // serialized game object replaces Pair with object like {fst, snd}
+  // this is a fix that creates Pairs when necessary
+  const state = {
+    table,
+    round: {
+      ...round,
+      blinds: S.maybe
+        (Pair(1)(2))
+        (b => Pair(Pair.fst(b))(Pair.snd(b)))
+        (toMaybe(round.blinds)),
+      cards: S.maybe
+        ([])
+        (S.map(c => Pair(Pair.fst(c))(Pair.snd(c))))
+        (toMaybe(round.cards)),
+      winners: S.maybe
+        ([])
+        (S.map(w => ({...w, hand: toMaybe(w.hand.value)})))
+        (toMaybe(round.winners)),
+    },
   }
+
+  return reducer(state)
+}
 
 module.exports = {
   newTable,
