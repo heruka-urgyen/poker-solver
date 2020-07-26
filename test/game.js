@@ -414,6 +414,14 @@ test("end round", t => {
   )
 })
 
+test("pass custom id to round", t => {
+  const r = newGame(table1)
+    .update(actions => actions.newRound({id: "custom-id", deck: randomDeck()}))
+    .get()
+
+  t.deepEqual(r.round.id, "custom-id")
+})
+
 test("2-players: leavePlayer", t => {
   const table = {
     id: "1",
@@ -422,7 +430,7 @@ test("2-players: leavePlayer", t => {
   }
 
   const r = newGame(table)
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(1))
@@ -454,7 +462,7 @@ test("2-players: leavePlayer preflop", t => {
   }
 
   const r = newGame(table)
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.leave("1"))
     .update(actions => actions.getWinners)
@@ -492,7 +500,7 @@ test("2-player: bet - fold", t => {
   }
 
   const r = newGame(table1)
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(10))
@@ -540,7 +548,7 @@ test("2-player: call - check - bet - fold", t => {
   }
 
   const r = newGame(table1)
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(1))
@@ -587,7 +595,7 @@ test("3-player: bet - fold - call", t => {
   }
 
   const r = newGame(table2)
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(10))
@@ -631,7 +639,7 @@ test("3-player: bet - call - fold", t => {
   }
 
   const r = newGame(table2)
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(10))
@@ -667,7 +675,7 @@ test("2-player: limp - check", t => {
   }
 
   const r = newGame(table1)
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(1))
@@ -709,7 +717,7 @@ test("3-player: all in - all in - all in", t => {
     },}
 
   const r = newGame(table2)
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(50))
@@ -732,7 +740,7 @@ test("play round 2 players", t => {
   const r = newGame(table)
     .update(actions => actions.sitPlayer({id: "1", stack: 100}))
     .update(actions => actions.sitPlayer({id: "2", stack: 100}))
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(1))
@@ -781,7 +789,7 @@ test("play round 3 players", t => {
     .update(actions => actions.sitPlayer({id: "1", stack: 100}))
     .update(actions => actions.sitPlayer({id: "2", stack: 100}))
     .update(actions => actions.sitPlayer({id: "3", stack: 100}))
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(10))
@@ -814,7 +822,7 @@ test("play round 3 players all in", t => {
     .update(actions => actions.sitPlayer({id: "1", stack: 50}))
     .update(actions => actions.sitPlayer({id: "2", stack: 100}))
     .update(actions => actions.sitPlayer({id: "3", stack: 100}))
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(50))
@@ -856,7 +864,7 @@ test("play round 3 players all in fold", t => {
     .update(actions => actions.sitPlayer({id: "1", stack: 50}))
     .update(actions => actions.sitPlayer({id: "2", stack: 100}))
     .update(actions => actions.sitPlayer({id: "3", stack: 100}))
-    .update(actions => actions.newRound(randomDeck()))
+    .update(actions => actions.newRound({deck: randomDeck()}))
     .update(actions => actions.postBlinds)
     .update(actions => actions.deal)
     .update(actions => actions.bet(50))

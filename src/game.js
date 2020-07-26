@@ -116,25 +116,35 @@ const newRoundExtended = def("newRoundExtended")({})
     }
   })
 
-//    newRound :: Cards -> Game -> Game
-const newRound = deck => ({table, round}) => _newRound({table, round: S.Just(round), deck})
+const toMaybe = v => (v == null) || Object.keys(v).length === 0 ? S.Nothing : S.Just(v)
 
 //    newRound :: Cards -> Game -> Game
-const newFirstRound = deck => ({table}) => _newRound({table, round: S.Nothing, deck})
+const newRound = ({deck, id}) => ({table, round}) =>
+  _newRound({table, round: S.Just(round), id: toMaybe(id), deck})
 
-//    newRound0 :: {Table, Maybe Round, Cards} -> Game
+//    newRound :: Cards -> Game -> Game
+const newFirstRound = ({deck, id}) => ({table}) =>
+  _newRound({table, round: S.Nothing, id: toMaybe(id), deck})
+
+//    newRound0 :: {Table, Maybe Round, Maybe Round.id, Cards} -> Game
 const _newRound = def
   ("newRound")
   ({})
-  ([$.RecordType({table: Table, round: $.Maybe(Round), deck: Cards}), Game])
-  (({table, round, deck}) => {
-    const newRoundId = uuid.v4
+  ([
+    $.RecordType({
+      table: Table,
+      round: $.Maybe(Round),
+      id: $.Maybe(Round.types.id),
+      deck: Cards}),
+    Game])
+  (({table, round, id, deck}) => {
+    const newRoundId = S.fromMaybe(uuid.v4())(id)
     const [button, blinds] = S.maybe([-1, Pair(1)(2)])(r => [r.button, r.blinds])(round)
 
     return {
       table,
       round: newRoundExtended
-        (newRoundId())
+        (newRoundId)
         (table)
         ((button + 1) % table.players.length)
         (blinds)
@@ -368,8 +378,6 @@ const newGame = table => {
 
   return reducer(state)
 }
-
-const toMaybe = v => (v == null) || Object.keys(v).length === 0 ? S.Nothing : S.Just(v)
 
 //    loadGame :: (JSON Game | Game) -> (Game -> Game) -> Game
 const loadGame = ({table, round}) => {
