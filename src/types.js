@@ -18,6 +18,7 @@ const HAND_RANKS =  [
   "Straight Flush",
 ]
 const ROUND_STATUS = ["IN_PROGRESS", "FINISHED", "ALL_IN"]
+const STREET_STATUS = ["IN_PROGRESS", "FINISHED"]
 const STREETS = ["PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN"]
 
 //    Rank :: Type
@@ -49,7 +50,7 @@ const Player = $.NamedRecordType("Player")("")([])
 //    Table :: Type
 const Table = $.NamedRecordType("Table")("")([])
   ({
-    id: $.PositiveInteger,
+    id: $.String,
     maxPlayers: $.PositiveInteger,
     players: $.Array(Player),
   })
@@ -61,6 +62,10 @@ const RoundStatus = $.NullaryType("RoundStatus")("")([$.String])
 //    Street :: Type
 const Street = $.NullaryType("Street")("")([$.String])
   (x => STREETS.indexOf(x) > -1)
+
+//    StreetStatus :: Type
+const StreetStatus = $.NullaryType("StreetStatus")("")([$.String])
+  (x => STREET_STATUS.indexOf(x) > -1)
 
 //    Bet :: Type
 const Bet = $.NamedRecordType("Bet")("")([])
@@ -86,14 +91,16 @@ const Pots = $.NamedRecordType("Pots")("")([])
 //    Round :: Type
 const Round = $.NamedRecordType("Round")("")([])
   ({
-    id: $.PositiveInteger,
+    id: $.String,
     status: RoundStatus,
     street: Street,
+    streetStatus: StreetStatus,
     tableId: Table.types.id,
     deck: Cards,
     communityCards: Cards,
     cards: $.Array($.Pair($.String)(Cards)),
     blinds: $.Pair($.PositiveInteger)($.PositiveInteger),
+    blindsPosted: $.Boolean,
     bets: $.Array(Bet),
     pots: Pots,
     button: $.NonNegativeInteger,
@@ -104,7 +111,6 @@ const Round = $.NamedRecordType("Round")("")([])
       hand: $.Maybe(Hand),
     })),
   })
-
 
 //    Game :: Type
 const Game = $.NamedRecordType("Game")("")([])
@@ -126,6 +132,7 @@ module.exports = {
   Round,
   Street,
   STREETS,
+  STREET_STATUS,
   ROUND_STATUS,
   Bet,
   Pots,

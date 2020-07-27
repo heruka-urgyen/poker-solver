@@ -1,7 +1,9 @@
 const S = require("sanctuary")
 const $ = require("sanctuary-def")
-const {def, CARD_RANKS, CARD_SUITS, Card, Cards} = require("./types")
 const Descending = require("sanctuary-descending")
+const seedrandom = require("seedrandom")
+
+const {def, CARD_RANKS, CARD_SUITS, Card, Cards} = require("./types")
 
 //    showCard :: Card -> CardNotation
 const showCard = def("showCard")({})([Card, $.String])
@@ -16,29 +18,29 @@ const sortCardsBy = def("sortCardsBy")({})([$.String, Cards, Cards])
   (s => S.sortBy (x => Descending(x[s])))
 
 const deck = S.chain(r => S.map(s => newCard(r + s))(CARD_SUITS))(CARD_RANKS)
-const shuffle = deck => type => {
-  if (type === "order") {return deck}
+const shuffle = rng => deck => {
+  const cards = [...deck]
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * i)
+    const temp = cards[i]
 
-  const sorted = [...deck]
-
-  for (let i = sorted.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * i)
-    const temp = sorted[i]
-
-    sorted[i] = sorted[j]
-    sorted[j] = temp
+    cards[i] = cards[j]
+    cards[j] = temp
   }
 
-  return sorted
+  return cards
 }
 
-//    newDeck :: (Order | Shuffle) -> Cards
-const newDeck = def("newDeck")({})([$.String, Cards])
-  (shuffle(deck))
+const orderedDeck = () => deck
+const randomDeck = () => shuffle(Math.random)(deck)
+const seededDeck = def("seededDeck")({})([$.String, Cards])
+  (seed => shuffle(seedrandom(seed))(deck))
 
 module.exports = {
   showCard,
   newCard,
   sortCardsBy,
-  newDeck,
+  orderedDeck,
+  randomDeck ,
+  seededDeck,
 }
