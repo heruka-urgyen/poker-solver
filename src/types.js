@@ -2,7 +2,10 @@ const S = require("sanctuary")
 const $ = require("sanctuary-def")
 
 const env = $.env;
-const def = $.create({checkTypes: true, env})
+const def = $.create({
+  checkTypes: process.env.NODE_ENV !== "production",
+  env,
+})
 
 const CARD_SUITS = ["c", "d", "h", "s"]
 const CARD_RANKS =  ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]
